@@ -24,8 +24,10 @@ xhat=rm.rotationmatrix(phi,theta).transpose()[0]
 yhat=rm.rotationmatrix(phi,theta).transpose()[1]
 zhat=rm.rotationmatrix(phi,theta).transpose()[2]
 
-def angle_of_attack(vx,vy,vz):
-	v_lab=np.array([vx,vy,vz])
-	z_component=np.dot(zhat,v_lab)
+def v_lab(vx,vy,vz):
+	return np.array([vx,vy,vz])
+
+def angle_of_attack:
+	z_component=np.dot(zhat,v_lab(vx,vy,vz))
 	v_plane=v_lab-z_component*zhat
 	return math.atan(z_component/np.linalg.norm(v_plane)) #Not sure what the sign of arctan function should be
