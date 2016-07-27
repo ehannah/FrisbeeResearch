@@ -17,10 +17,11 @@ coefficient functions - refer to the functions(!) that return the force/torque
 Lift 
 '''
 
-param_L_0=0.3331 #Lift paramter for alpha=0, constant value; reported in Hummel (2003)
-param_L_alpha=1.9123 #Lift parameter corresponding angle of attack; repported in Hummel (2003)
+#param_L_0 is the lift paramter for alpha=0, constant value; reported in Hummel (2003)
+#param_L_alpha=1.9123 is the lift parameter corresponding angle of attack; repported in Hummel (2003)
+#alpha is the angle of attack, defined as the angle between the disc's velocity and the plane of the disc
 
-def coef_L(alpha):
+def coef_L(alpha, param_L_0, param_L_alpha):
 #Total lift coefficient, calculated by summing param_L_alpha and (constant) param_L_0
 	return param_L_0 + param_L_alpha*alpha
 
@@ -28,17 +29,18 @@ def coef_L(alpha):
 Drag
 '''
 
-param_D_0 = 0.1769 #Drag parameter at alpha=alpha_0 (minimum value of alpha). Constant value; reported in Hummel (2003)
-param_D_alpha = 0.685 #Drag parameter corresponding to angle of attack; reported in Hummel (2003)
+#param_D_0 is the drag parameter at alpha=alpha_0 (minimum value of alpha). Constant value; reported in Hummel (2003)
+#param_D_alpha is the drag parameter corresponding to angle of attack; reported in Hummel (2003)
+#alpha is the angle of attack, as defined above
 
-def coef_D_alpha(alpha):
+def coef_D_alpha(alpha, param_D_alpha, alpha_0):
 	#Portion of drag coefficient dependent on angle of attack
 	#Quadratic function of angle of attack (Hummel 2003)
 	#alpha_0 is a constant value, reported by Hummel 2003 to be -4 degrees
 
 	return param_D_alpha*(alpha-alpha_0)*(alpha-alpha_0)
 
-def coef_D_total(alpha):
+def coef_D_total(alpha, param_D_alpha, param_D_0):
 #Total drag coefficient, calculated by summing coef_D_alpha and (constant) PD_0	
 	return param_D_0 + coef_D_alpha(alpha)
 
@@ -48,21 +50,21 @@ See page 12 eqn. 2.8b, Hummel 2003
 
 '''
 
-param_tau_y0=-0.0821 #Y-body torque parameter (pitch) at alpha=0, Hummel (2003)
-param_tau_yalpha=0.4338#Y-body torque parameter corresponding to alpha
-param_tau_ywy=-0.0144#Y-body torque parameter corresponding to y-direction angular velocity
-wy=10#Angular velocity in y direction
+#param_tau_y0 is the y-body torque parameter (pitch) at alpha=0, Hummel (2003)
+#param_tau_yalpha is the y-body torque parameter corresponding to alpha
+#param_tau_ywy is the y-body torque parameter corresponding to y-direction angular velocity
+#wy is angular velocity in y direction
 
-def coef_tau_y_a(alpha):
+def coef_tau_y_a(alpha, param_tau_yalpha):
 	#Portion of torque coefficient in y direction dependent on of angle of attack
 	return param_tau_yalpha*alpha
 
-def coef_tau_y_wy(wy):
+def coef_tau_y_wy(wy, param_tau_ywy):
 	#Portion of torque coefficient in y direction dependent on y angular velocity
 	#wy=angular velocity, rad/sec
 	return param_tau_ywy*wy
 
-def coef_tau_y_total(alpha,wy):
+def coef_tau_y_total(alpha,wy, param_tau_y0):
 	#Total pitch moment
 	return coef_tau_y_a(alpha)+coef_tau_y_wy(wy)+param_tau_y0
 
@@ -72,10 +74,10 @@ See page 12 eqn. 2.8a, Hummel 2003
 
 '''
 
-param_tau_xwx=-0.0125 #Torque parameter for x direction, corresponds to x angular velocity
-param_tau_xwz=0.00171#Torque parameter for x direciton, corresponds to z angular velocity
+#param_tau_xwx is a torque parameter for x direction, corresponds to x angular velocity
+#param_tau_xwz=0.00171 is a torque parameter for x direciton, corresponds to z angular velocity
 
-def coef_tau_x_total(wx,wz):
+def coef_tau_x_total(wx,wz, param_tau_xwx, param_tau_xwz):
 	return (param_tau_xwz*wz)+(param_tau_xwx*wx)
 
 '''
@@ -84,8 +86,8 @@ See page 12 eqn. 2.8c, Hummel 2003
 
 '''
 
-param_tau_zwz=-0.0000341 #Torque parameter for z direction, corresponds to z angular velocity
+#param_tau_zwz is the torque parameter for z direction, corresponds to z angular velocity
 
-def coef_tau_z_total(wz):
+def coef_tau_z_total(wz, param_tau_zwz):
 	return param_tau_zwz*wz
 	
