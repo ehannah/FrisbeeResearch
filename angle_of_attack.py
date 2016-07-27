@@ -13,17 +13,21 @@ is the scalar component of the velocity that is not in the plane of the disc
 the z-body unit vector from the lab-frame velocity.
 
 '''
-import math
 import numpy as np
 import rotationmatrix as rm
 
 #Inertial coordinates of unit vectors correspond to columns of rotation matrix
 #Unit vectors are [1,0,0], [0,1,0], and [0,0,1], respectively
 
-xbhat=rm.rotationmatrix(phi,theta).transpose()[0]
-ybhat=rm.rotationmatrix(phi,theta).transpose()[1]
-zbhat=rm.rotationmatrix(phi,theta).transpose()[2]
+def xbhat(phi, theta):
+	return np.rm.rotationmatrix(phi,theta).transpose()[0]
 
+def ybhat(phi, theta):
+	return np.rm.rotationmatrix(phi,theta).transpose()[1]
+
+def zbhat(phi, theta)
+	return np.rm.rotationmatrix(phi,theta).transpose()[2]
+	
 def v_lab(vx,vy,vz):
 	return np.array([vx,vy,vz])
 	
