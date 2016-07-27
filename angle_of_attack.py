@@ -20,9 +20,9 @@ import rotationmatrix as rm
 #Inertial coordinates of unit vectors correspond to columns of rotation matrix
 #Unit vectors are [1,0,0], [0,1,0], and [0,0,1], respectively
 
-xhat=rm.rotationmatrix(phi,theta).transpose()[0]
-yhat=rm.rotationmatrix(phi,theta).transpose()[1]
-zhat=rm.rotationmatrix(phi,theta).transpose()[2]
+xbhat=rm.rotationmatrix(phi,theta).transpose()[0]
+ybhat=rm.rotationmatrix(phi,theta).transpose()[1]
+zbhat=rm.rotationmatrix(phi,theta).transpose()[2]
 
 def v_lab(vx,vy,vz):
 	return np.array([vx,vy,vz])
