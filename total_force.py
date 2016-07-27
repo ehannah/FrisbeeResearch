@@ -20,4 +20,4 @@ def F_gravity(m):
 def total_force():
 	return ft.F_drag(vx,vy,vz,alpha)*-unitv.vhat() 
 	+ft.F_lift(vx,vy,vz,alpha)*(np.cross(unitv.vhat(),unitv.ybhat))
-	+F_gravity
+	+F_gravity(m)
