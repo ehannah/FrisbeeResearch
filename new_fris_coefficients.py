@@ -18,7 +18,7 @@ Lift
 '''
 
 #param_L_0 is the lift paramter for alpha=0, constant value; reported in Hummel (2003)
-#param_L_alpha=1.9123 is the lift parameter corresponding angle of attack; repported in Hummel (2003)
+#param_L_alpha is the lift parameter corresponding angle of attack; repported in Hummel (2003)
 #alpha is the angle of attack, defined as the angle between the disc's velocity and the plane of the disc
 
 def coef_L(alpha, param_L_0, param_L_alpha):
