@@ -16,3 +16,6 @@ class Frisbee(object):
     self.theta=theta
     self.gamma=gamma
     
+  def __str__(self):
+    return 'Position: (' + str(self.x)+','+str(self.y)+','+str(self.z)+')'+'\n'
+      +'Velocity: ('+str(self.vx)+','+str(self.vy)+','+str(self.vz)+')'
