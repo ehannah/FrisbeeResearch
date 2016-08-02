@@ -15,15 +15,20 @@ class Frisbee(object):
     self.phi=phi
     self.theta=theta
     self.gamma=gamma
+    self.velocity=np.array([vx,vy,vz])
     
   def __str__(self):
     return 'Position: (' + str(self.x)+','+str(self.y)+','+str(self.z)+')'+'\n'
     +'Velocity: ('+str(self.vx)+','+str(self.vy)+','+str(self.vz)+')'
 
+  #Calculate rotation matrix.
   def rotationmatrix(self):
     return np.array(
   		[[math.cos(self.phi)*math.cos(self.theta), -math.sin(self.phi), -math.cos(self.phi)*math.sin(self.theta)],
   		[math.sin(self.phi)*math.cos(self.theta), math.cos(self.phi), -math.sin(self.theta)*math.sin(self.phi)],
   		[math.sin(self.theta), 0, math.cos(self.theta)]])
-  
-  def unitvectors(
+  		
+  #Calculate angle of attack.
+  def attackangle(
+
+    
