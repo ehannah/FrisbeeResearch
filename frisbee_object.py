@@ -27,8 +27,12 @@ class Frisbee(object):
   		[[math.cos(self.phi)*math.cos(self.theta), -math.sin(self.phi), -math.cos(self.phi)*math.sin(self.theta)],
   		[math.sin(self.phi)*math.cos(self.theta), math.cos(self.phi), -math.sin(self.theta)*math.sin(self.phi)],
   		[math.sin(self.theta), 0, math.cos(self.theta)]])
-  		
+  	
   #Calculate angle of attack.
-  def attackangle(
+  def attackangle(self):
+    zbhat=np.transpose(rotationmatrix(self))[2]
+    zcomponent=np.dot(self.velocity,zbhat)
+    v_plane=self.velocity-zbhat*zcomponent
+    return math.atan(zcomponent/np.linalg.norm(v_plane))
 
     
