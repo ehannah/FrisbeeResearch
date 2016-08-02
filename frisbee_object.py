@@ -34,5 +34,3 @@ class Frisbee(object):
     zcomponent=np.dot(self.velocity,zbhat)
     v_plane=self.velocity-zbhat*zcomponent
     return math.atan(zcomponent/np.linalg.norm(v_plane))
-
-    
