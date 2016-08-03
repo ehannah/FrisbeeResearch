@@ -18,8 +18,7 @@ class Frisbee(object):
     self.velocity=np.array([vx,vy,vz])
     
   def __str__(self):
-    return 'Position: (' + str(self.x)+','+str(self.y)+','+str(self.z)+')'+'\n'
-    +'Velocity: ('+str(self.vx)+','+str(self.vy)+','+str(self.vz)+')'
+    return 'Position: (' + str(self.x)+','+str(self.y)+','+str(self.z)+')'+'\n'+'Velocity: ('+str(self.vx)+','+str(self.vy)+','+str(self.vz)+')'
 
   #Calculate rotation matrix.
   def rotationmatrix(self):
