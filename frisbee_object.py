@@ -29,7 +29,7 @@ class Frisbee(object):
   	
   #Calculate angle of attack.
   def attackangle(self):
-    zbhat=np.transpose(rotationmatrix(self))[2]
+    zbhat=np.transpose(self.rotationmatrix()[2])
     zcomponent=np.dot(self.velocity,zbhat)
     v_plane=self.velocity-zbhat*zcomponent
     return math.atan(zcomponent/np.linalg.norm(v_plane))
