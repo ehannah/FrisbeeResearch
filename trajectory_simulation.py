@@ -31,3 +31,42 @@ AREA=0.0568 #m^2, surface area of Discraft Ultrastar (Hummel 2003)
 Izz=0.00235 #kg-m^2, moment of inertia about the z-axis
 Ixx=Iyy=Ixy=0.00122 #kg-m^2, moment of inertia about the x and y axes
 d=0.269 #m, diameter of Discraft Ultrastar (Hummel 2003)
+
+#---------------------------------------------------------------------------#
+
+#Set initial conditions:
+#Notes:
+#-->Psi is defined as the angle about the x-axis. Theta is defined as the angle about
+#the y-axis. Phi is defined as the angle about the z-axis.
+#-->Wind is currently not factored into code.
+
+#Initial position coordinates.
+x=1
+y=1
+z=0
+
+#Initial velocity coordinates
+vx=1
+vy=1
+vz=1
+
+#Initial angles.
+psi=1
+theta=1
+phi=1
+
+#Initial angular velocities.
+wx=1 #Corresponds to psi.
+wy=1 #Corresponds to theta.
+wz=1 #Corresponds to phi.
+
+#---------------------------------------------------------------------------#
+
+#Create a frisbee object with above initial conditions using frisbee_object code.
+test_fris=frisbee.Frisbee(x,y,z,vx,vy,vz,wx,wy,wz,psi,theta,phi)
+
+#Calculate angle of attack.
+alpha=test_fris.attackangle()
+
+#Call functions that calculate forces and torques, then multiply them by appropriate
+#unit vectors.
