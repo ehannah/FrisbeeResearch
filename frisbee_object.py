@@ -4,7 +4,7 @@ import math
 #Create a Frisbee class, and assign Frisbee self values that correspond 
 #to physical characteristics of the frisbee.
 class Frisbee(object):
-  def __init__(self,x,y,z,vx,vy,vz,wx,wy,wz,phi,theta,gamma):
+  def __init__(self,x,y,z,vx,vy,vz,wx,wy,wz,psi,theta,phi,):
     self.x=x
     self.y=y
     self.z=z
@@ -14,10 +14,11 @@ class Frisbee(object):
     self.wx=wx
     self.wy=wy
     self.wz=wz
-    self.phi=phi
+    self.psi=psi
     self.theta=theta
-    self.gamma=gamma
+    self.gamma=phi
     self.velocity=np.array([vx,vy,vz])
+
     
   #Represent Frisbee object by printing instantaneous position and velocity.
   def __str__(self):
