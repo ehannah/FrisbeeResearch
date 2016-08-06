@@ -1,4 +1,5 @@
 #The following code is adapted from Hummel 2003 and unpublished code written by Tom McClintock
+#Code simulates Discraft Ultrastar trajectory.
 
 #Main code will:
 #1) Define constants.
