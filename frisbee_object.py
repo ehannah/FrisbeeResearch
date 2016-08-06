@@ -16,7 +16,7 @@ class Frisbee(object):
     self.wz=wz
     self.psi=psi
     self.theta=theta
-    self.gamma=phi
+    self.phi=phi
     self.velocity=np.array([vx,vy,vz])
 
     
@@ -61,5 +61,5 @@ class Frisbee(object):
   #in the plane of the disc, which we calculate using an arctan function.
   def attackangle(self):
     zcomponent=np.dot(self.velocity,self.zbhat())
-    v_plane=self.velocity-zbhat*zcomponent
-    return math.atan(zcomponent/np.linalg.norm(v_plane))
+    v_plane=self.velocity-self.zbhat()*zcomponent
+    return math.atan(zcomponent/(np.linalg.norm(v_plane)))
