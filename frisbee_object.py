@@ -72,7 +72,7 @@ class Frisbee(object):
     return np.dot(self.velocity,self.velocity)
 
   #Calculate lift force acting on Frisbee. (Note that at this point, forces are not rotated
-  #from lab frame into frisbee frame.
+  #from lab frame to frisbee frame.
   def F_lift(self):
     return coef.coef_L(self.attackangle(), param_L_0, param_L_alpha)*0.5*rho*self.area*self.velocity_dot()
 
