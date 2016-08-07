@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import new_fris_coefficients as coef
 
 #Create a Frisbee class, and assign Frisbee self values that correspond 
 #to physical characteristics of the frisbee.
@@ -18,6 +19,8 @@ class Frisbee(object):
     self.theta=theta
     self.phi=phi
     self.velocity=np.array([vx,vy,vz])
+    self.area=0.057 #m^2, surface area of Discraft Ultrastar (Hummel 2003)
+    self.diameter=0.269 #m, diameter of Discraft Ultrastar (Hummel 2003)
 
     
   #Represent Frisbee object by printing instantaneous position and velocity.
@@ -63,3 +66,17 @@ class Frisbee(object):
     zcomponent=np.dot(self.velocity,self.zbhat())
     v_plane=self.velocity-self.zbhat()*zcomponent
     return math.atan(zcomponent/(np.linalg.norm(v_plane)))
+
+  #Calculate dot product of velocity vector, by which we multiply forces.
+  def velocity_dot(self):
+    return np.dot(self.velocity,self.velocity)
+
+  #Calculate lift force acting on Frisbee. (Note that at this point, forces are not rotated
+  #from lab frame into frisbee frame.
+  def F_lift(self):
+    return coef.coef_L(self.attackangle(), param_L_0, param_L_alpha)*0.5*rho*self.area*self.velocity_dot()
+
+  def F_drag(self):
+    return coef.coef_D_total(self.attackangle(), param_D_alpha, param_D_0)*0.5*rho*self.area*self.velocity_dot()
+
+
