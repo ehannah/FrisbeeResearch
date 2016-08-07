@@ -33,16 +33,18 @@ Drag
 #param_D_alpha is the drag parameter corresponding to angle of attack; reported in Hummel (2003)
 #alpha is the angle of attack, as defined above
 
+#alpha_0 is a constant value, reported by Hummel 2003 to be -4 degrees
+alpha_0=-4
+
 def coef_D_alpha(alpha, param_D_alpha, alpha_0):
 	#Portion of drag coefficient dependent on angle of attack
 	#Quadratic function of angle of attack (Hummel 2003)
-	#alpha_0 is a constant value, reported by Hummel 2003 to be -4 degrees
-
+	
 	return param_D_alpha*(alpha-alpha_0)*(alpha-alpha_0)
 
 def coef_D_total(alpha, param_D_alpha, param_D_0):
 #Total drag coefficient, calculated by summing coef_D_alpha and (constant) PD_0	
-	return param_D_0 + coef_D_alpha(alpha)
+	return param_D_0 + coef_D_alpha(alpha, param_D_alpha, alpha_0)
 
 '''
 Torque in y direction (pitch moment)
