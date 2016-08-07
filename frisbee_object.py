@@ -25,7 +25,7 @@ class Frisbee(object):
     
   #Represent Frisbee object by printing instantaneous position and velocity.
   def __str__(self):
-    return 'Position: (' + str(self.x)+','+str(self.y)+','+str(self.z)+')'+'\n'+'Velocity: ('+str(self.vx)+','+str(self.vy)+','+str(self.vz)+')'
+    return "Position: (%f,%f,%f)\n"%(self.x,self.y,self.z)+"Velocity: (%f,%f,%f)\n"%(self.vx,self.vy,self.vz)
 
   #Calculate rotation matrix. Rotation matrix is the product Rz*Ry of "Euler Chained Rotation
   #Matrices", found at https://en.wikipedia.org/wiki/Davenport_chained_rotations. 
