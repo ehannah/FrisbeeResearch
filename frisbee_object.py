@@ -1,6 +1,8 @@
 import numpy as np
 import math
 import new_fris_coefficients as coef
+import model_object
+#---------------------------------------------------------------------------------------------------#
 
 #Create a Frisbee class, and assign Frisbee self values that correspond 
 #to physical characteristics of the frisbee.
@@ -22,10 +24,11 @@ class Frisbee(object):
     self.area=0.057 #m^2, surface area of Discraft Ultrastar (Hummel 2003)
     self.diameter=0.269 #m, diameter of Discraft Ultrastar (Hummel 2003)
 
-    
   #Represent Frisbee object by printing instantaneous position and velocity.
   def __str__(self):
     return "Position: (%f,%f,%f)\n"%(self.x,self.y,self.z)+"Velocity: (%f,%f,%f)\n"%(self.vx,self.vy,self.vz)
+
+#---------------------------------------------------------------------------------------------------#
 
   #Calculate rotation matrix. Rotation matrix is the product Rz*Ry of "Euler Chained Rotation
   #Matrices", found at https://en.wikipedia.org/wiki/Davenport_chained_rotations. 
@@ -35,6 +38,8 @@ class Frisbee(object):
   		[math.sin(self.phi)*math.cos(self.theta), math.cos(self.phi), -math.sin(self.theta)*math.sin(self.phi)],
   		[math.sin(self.theta), 0, math.cos(self.theta)]])
 
+#---------------------------------------------------------------------------------------------------#
+
   #Below are unit important unit vectors which we will ultimately use to orient the forces
   #and torques in the correct directions.
 
@@ -42,7 +47,7 @@ class Frisbee(object):
   def vhat(self):
     return self.velocity/np.linalg.norm(self.velocity)
 
-  #Calculate unit vector in z-body direction. Corresponds to 3rd column of rotation matrix. 
+  #Calculate unit vector in z-body direction of lab frame. Corresponds to 3rd column of rotation matrix. 
   def zbhat(self):
     return np.transpose(self.rotationmatrix()[2])
 
@@ -54,6 +59,8 @@ class Frisbee(object):
 
   def ybhat(self):
     return np.cross(self.zbhat(),self.xbhat())
+
+#---------------------------------------------------------------------------------------------------#
 
   #Calculate angle of attack, defined as angle between plane of disc and velocity vector
   #of the frisbee's motion. First step is to calculate scalar component of the velocity 
@@ -67,16 +74,11 @@ class Frisbee(object):
     v_plane=self.velocity-self.zbhat()*zcomponent
     return math.atan(zcomponent/(np.linalg.norm(v_plane)))
 
+#---------------------------------------------------------------------------------------------------#
+
   #Calculate dot product of velocity vector, by which we multiply forces.
   def velocity_dot(self):
+
     return np.dot(self.velocity,self.velocity)
 
-  #Calculate lift force acting on Frisbee. (Note that at this point, forces are not rotated
-  #from lab frame to frisbee frame.
-  def F_lift(self):
-    return coef.coef_L(self.attackangle(), param_L_0, param_L_alpha)*0.5*rho*self.area*self.velocity_dot()
-
-  def F_drag(self):
-    return coef.coef_D_total(self.attackangle(), param_D_alpha, param_D_0)*0.5*rho*self.area*self.velocity_dot()
-
-
+#---------------------------------------------------------------------------------------------------#
