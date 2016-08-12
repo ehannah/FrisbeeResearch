@@ -5,7 +5,7 @@ import new_fris_coefficients as coef
 #Create a Frisbee class, and assign Frisbee self values that correspond 
 #to physical characteristics of the frisbee.
 class Frisbee(object):
-  def __init__(self,x,y,z,vx,vy,vz,wx,wy,wz,psi,theta,phi,):
+  def __init__(self,x,y,z,vx,vy,vz,wx,wy,wz,psi,theta,phi):
     self.x=x
     self.y=y
     self.z=z
