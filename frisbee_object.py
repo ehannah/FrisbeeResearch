@@ -2,6 +2,10 @@ import numpy as np
 import math
 import new_fris_coefficients as coef
 import model_object
+
+rho=1.225 #kg/m^3, density of air
+area=0.057 #m^2, area of disc used in Hummel 2003
+
 #---------------------------------------------------------------------------------------------------#
 
 #Create a Frisbee class, and assign Frisbee self values that correspond 
@@ -27,6 +31,9 @@ class Frisbee(object):
   #Represent Frisbee object by printing instantaneous position and velocity.
   def __str__(self):
     return "Position: (%f,%f,%f)\n"%(self.x,self.y,self.z)+"Velocity: (%f,%f,%f)\n"%(self.vx,self.vy,self.vz)
+
+  def initialize_model(self, PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz):
+    self.model=model_object.Model(PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz)
 
 #---------------------------------------------------------------------------------------------------#
 
@@ -82,3 +89,38 @@ class Frisbee(object):
     return np.dot(self.velocity,self.velocity)
 
 #---------------------------------------------------------------------------------------------------#
+
+  #Calculate forces acting on Frisbee
+  def get_force(self):
+
+    alpha=self.attackangle()
+    velocity=self.velocity_dot()
+
+    F_lift=self.model.coef_lift(alpha)*0.5*rho*area*velocity
+
+    F_drag=self.model.coef_drag(alpha)*0.5*rho*area*velocity
+    return F_lift, F_drag
+
+#---------------------------------------------------------------------------------------------------#
+
+  #Calculate torques acting on Frisbee
+
+  def get_torque(self):
+
+    alpha=self.attackangle()
+    velocity=self.velocity_dot()
+
+    #X-body torque
+    roll=self.model.coef_roll(self.wx,self.wz)*0.5*rho*area*velocity
+
+    #Y-body torque
+    pitch=self.model.coef_pitch(alpha,self.wy)*0.5*rho*area*velocity
+
+    #Z-body torque
+    spin=self.model.coef_spin(self.wz)*0.5*rho*area*velocity
+
+    return roll, pitch, spin
+
+
+    
+

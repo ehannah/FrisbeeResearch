@@ -6,10 +6,7 @@
 
 import numpy as np
 import math
-import frisbee_object as frisobj 
 
-rho=1.225 #kg/m^3, density of air
-area=0.057 #m^2, area of disc used in Hummel 2003
 
 #---------------------------------------------------------------------------------------------------#
 
@@ -61,7 +58,7 @@ class Model(object):
 	#Calculate total roll moment (x-body torque coefficient)
 	#wz is z-direction angular velocity, wx is x-direction angular velocity
 
-	def coef_roll(self, wx, wy):
+	def coef_roll(self, wx, wz):
 		return (self.PTxwz*wz)+(self.PTxwx*wx)
 
 	#Calculate total spin down moment (z-body torque coefficient)
@@ -69,10 +66,4 @@ class Model(object):
 		return self.PTzwz*wz
 
 #---------------------------------------------------------------------------------------------------#
-
-	#Calculate forces and torques acting on Frisbee
-
-	#Lift force
-	def F_lift(self, velocity):
-		return self.coef_lift(alpha)*0.5*rho*area*velocity
 
