@@ -35,8 +35,8 @@ class Frisbee(object):
   def __str__(self):
     return "Position: (%f,%f,%f)\n"%(self.x,self.y,self.z)+"Velocity: (%f,%f,%f)\n"%(self.vx,self.vy,self.vz)
 
-  def initialize_model(self, PL0, PLa, PD0, PDa, PTya, PTythetadot, PTy0, PTxphidot, PTxgammadot, PTzgammadot):
-    self.model=model_object.Model(PL0, PLa, PD0, PDa, PTya, PTythetadot, PTy0, PTxphidot, PTxgammadot, PTzgammadot)
+  def initialize_model(self, PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz):
+    self.model=model_object.Model(PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz)
 
 #---------------------------------------------------------------------------------------------------#
 
@@ -183,7 +183,7 @@ class Frisbee(object):
     #phi ang. velocity, theta ang. velocity, gamma ang. velocity
     #phi ang. acceleration, theta ang. acceleration, gamma ang. acceleration]
 
-  def equations_of_motion(self):
+  def variable_array(self):
     return ([self.vx, self.vy, self.vz,
       self.get_force()[0]/m, self.get_force()[1]/m, self.get_force()[2]/m],
       self.phidot, self.thetadot, self.gammadot,
