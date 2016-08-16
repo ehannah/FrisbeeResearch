@@ -183,7 +183,7 @@ class Frisbee(object):
     #phi ang. velocity, theta ang. velocity, gamma ang. velocity
     #phi ang. acceleration, theta ang. acceleration, gamma ang. acceleration]
 
-  def variable_array(self):
+  def derivatives_array(self):
     return ([self.vx, self.vy, self.vz,
       self.get_force()[0]/m, self.get_force()[1]/m, self.get_force()[2]/m],
       self.phidot, self.thetadot, self.gammadot,
