@@ -14,7 +14,7 @@ Ixx=Iyy=Ixy=0.00122 #kg-m^2
 #Create a Frisbee class, and assign Frisbee self values that correspond 
 #to physical characteristics of the frisbee.
 class Frisbee(object):
-  def __init__(self,x,y,z,vx,vy,vz,phidot,thetadot,gammadot,psi,theta,phi):
+  def __init__(self,x,y,z,vx,vy,vz,phidot,thetadot,gammadot,phi,theta,gamma):
     self.x=x
     self.y=y
     self.z=z
@@ -24,9 +24,9 @@ class Frisbee(object):
     self.phidot=phidot
     self.thetadot=thetadot
     self.gammadot=gammadot
-    self.psi=psi
-    self.theta=theta
     self.phi=phi
+    self.theta=theta
+    self.gamma=gamma
     self.velocity=np.array([vx,vy,vz])
     self.area=0.057 #m^2, surface area of Discraft Ultrastar (Hummel 2003)
     self.diameter=0.269 #m, diameter of Discraft Ultrastar (Hummel 2003)
@@ -37,6 +37,9 @@ class Frisbee(object):
 
   def initialize_model(self, PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz):
     self.model=model_object.Model(PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz)
+
+  def initial_conditions(self):
+    return np.array([self.x,self.y,self.z,self.vx,self.vy,self.vz,self.phi,self.theta,self.gamma,self.phidot,self.thetadot,self.gammadot])
 
 #---------------------------------------------------------------------------------------------------#
 
@@ -177,17 +180,32 @@ class Frisbee(object):
     return np.array([phi_dd, theta_dd, gamma_dd])
 #---------------------------------------------------------------------------------------------------#
 
-  #Create array of variables to feed into numerical integrator
+  #Create array of derivatives to feed into numerical integrator
   #variable_array=[x-velocity, y-velocity, z velocity
     #x-accelration, y-acceleration, z-acceleration,
     #phi ang. velocity, theta ang. velocity, gamma ang. velocity
     #phi ang. acceleration, theta ang. acceleration, gamma ang. acceleration]
 
   def derivatives_array(self):
-    return ([self.vx, self.vy, self.vz,
-      self.get_force()[0]/m, self.get_force()[1]/m, self.get_force()[2]/m],
+    return [self.vx, self.vy, self.vz,
+      self.get_force()[0]/m, self.get_force()[1]/m, self.get_force()[2]/m,
       self.phidot, self.thetadot, self.gammadot,
-      self.ang_acceleration()[0], self.ang_acceleration()[1], self.ang_acceleration()[2])
+      self.ang_acceleration()[0], self.ang_acceleration()[1], self.ang_acceleration()[2]]
 
-
-
+'''
+test_fris=Frisbee(1,2,3,4,5,6,7,8,9,10,11,12)
+print(test_fris)
+test_fris.initialize_model(1,2,3,4,5,6,7,8,9,10)
+print(test_fris.model)
+print(test_fris.rotationmatrix())
+print(test_fris.vhat(), test_fris.xbhat(), test_fris.ybhat(), test_fris.zbhat())
+print(test_fris.attackangle())
+print(test_fris.velocity_dot())
+print(test_fris.get_force())
+print(test_fris.ang_velocity_frisframe())
+print(test_fris.ang_velocity_labframe())
+print(test_fris.unit_ang_velocity())
+print(test_fris.get_torque())
+print(test_fris.ang_acceleration())
+print(test_fris.derivatives_array())
+'''
