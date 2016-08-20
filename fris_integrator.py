@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.integrate import odeint #odeint(func, y0, t[, args, Dfun, col_deriv, ...] Integrate a system of ordinary differential equations.
+from scipy.integrate import odeint #Integrates a system of ordinary differential equations given initial conditions.
 import math
 import frisbee_object
 import model_object

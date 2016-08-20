@@ -38,9 +38,6 @@ class Frisbee(object):
   def initialize_model(self, PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz):
     self.model=model_object.Model(PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz)
 
-  def initial_conditions(self):
-    return np.array([self.x,self.y,self.z,self.vx,self.vy,self.vz,self.phi,self.theta,self.gamma,self.phidot,self.thetadot,self.gammadot])
-
 #---------------------------------------------------------------------------------------------------#
 
   #Calculate rotation matrix. Rotation matrix is the product Rz*Ry of "Euler Chained Rotation
@@ -52,7 +49,8 @@ class Frisbee(object):
   		[math.sin(self.theta), 0, math.cos(self.theta)]])
 
 #---------------------------------------------------------------------------------------------------#
-
+  #DECIDE WHETHER LAB-->FRIS ROTATION OR VICE VERSA
+  
   #Below are unit important unit vectors which we will ultimately use to orient the forces
   #and torques in the correct directions.
 
@@ -60,20 +58,30 @@ class Frisbee(object):
   def vhat(self):
     return self.velocity/np.linalg.norm(self.velocity)
 
-  #Calculate unit vector in z-body direction of lab frame. Corresponds to 3rd column of rotation matrix. 
+  #Calculate unit vector in z-body direction of lab frame. 
+  #C3 vector in Hummel 2003 is equivalent to z-body unit vector expressed in inertial coordinates
+  #In rotation matrix used for this program, Hummel's C3 corresponds to the first row
+  #of the matrix written from right to left. (C3'=[-cos(phi)sin(theta), -sin(phi), cos(phi)cos(theta)])
+  #In python, we obtain the first row of the rotation matrix from right to left by
+  #using np.fliplr(), which flips an array in the left/right direction.
+
   def zbhat(self):
-    return np.transpose(self.rotationmatrix()[2])
+    return np.fliplr(self.rotationmatrix())[0] #([001])
 
   #Calculate unit vector in x-body direction. Corresponds to unit vector in the direction
-  #of the plane of the disc (distinct from the velocity of the disc)
+  #of the plane of the disc, which is distinct from the direction of the disc's velocity
   def xbhat(self):
-    zcomponent=np.dot(self.velocity,self.zbhat())
-    return self.velocity-self.zbhat()*zcomponent
+    zcomponent=np.dot(self.velocity,self.zbhat()) #This is the lab-frame velocity vector
+    #dotted with the frisbee-frame z-body unit vector
+    vplane=self.velocity-self.zbhat()*zcomponent #Velocity in the plane of the disc's motion
+    return vplane/np.linalg.norm(vplane) #Unit vector in direction of plane of disc
 
+  #Calculate unit vector in y-body direction
   def ybhat(self):
     return np.cross(self.zbhat(),self.xbhat())
 
 #---------------------------------------------------------------------------------------------------#
+  #HOW DO I KNOW WHETHER I WANT ATAN OR -ATAN??
 
   #Calculate angle of attack, defined as angle between plane of disc and velocity vector
   #of the frisbee's motion. First step is to calculate scalar component of the velocity 
@@ -192,20 +200,3 @@ class Frisbee(object):
       self.phidot, self.thetadot, self.gammadot,
       self.ang_acceleration()[0], self.ang_acceleration()[1], self.ang_acceleration()[2]]
 
-'''
-test_fris=Frisbee(1,2,3,4,5,6,7,8,9,10,11,12)
-print(test_fris)
-test_fris.initialize_model(1,2,3,4,5,6,7,8,9,10)
-print(test_fris.model)
-print(test_fris.rotationmatrix())
-print(test_fris.vhat(), test_fris.xbhat(), test_fris.ybhat(), test_fris.zbhat())
-print(test_fris.attackangle())
-print(test_fris.velocity_dot())
-print(test_fris.get_force())
-print(test_fris.ang_velocity_frisframe())
-print(test_fris.ang_velocity_labframe())
-print(test_fris.unit_ang_velocity())
-print(test_fris.get_torque())
-print(test_fris.ang_acceleration())
-print(test_fris.derivatives_array())
-'''
