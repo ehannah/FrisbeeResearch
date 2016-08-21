@@ -30,17 +30,21 @@ def equations_of_motion(positions, t):
 def main():
 
 	#Integration of ODEs that reflect equations of motion.
+	#Common release conditions obtained from Hummel 2003 (pg. 83)
 
 	#Define initial conditions 
+	speed0=14 #(m/s), initial speed
+	beta0=0.105 #flight path angle in radians btw. velocity vector and horizontal
+
 	x=0 #m, lab displacement in x direction
 	y=0 #m, lab displacement in y direction
 	z=1 #m, lab displacement in z direction
 	vx=10 #initial x component velocity
 	vy=0 #initial y component velocity
 	vz=5 #initial z component velocity 
-	phi=16 #degrees, roll angle - corresponds to angle about x-axis
-	theta=0 #degrees, pitch angle - corresponds to angle about y-axis
-	gamma=0 #degrees, spin angle - corresponds to angle about z-xis
+	phi=16 #radians, roll angle - corresponds to angle about x-axis
+	theta=0.192 #radians, pitch angle - corresponds to angle about y-axis
+	gamma=0 #radians, spin angle - corresponds to angle about z-xis
 	phidot=0 #radians/s, roll angular momentum
 	thetadot=0 #radians/s, pitch angular momentum
 	gammadot=50 #radians/s, spin angular momentum
