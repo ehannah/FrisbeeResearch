@@ -3,3 +3,6 @@
 
 #Ignore emacs back up files.
 *~
+
+#Ignore .DS_store files, store custom attributes of folders
+*.DS_store
