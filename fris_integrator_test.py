@@ -11,7 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 #---------------------------------------------------------------------------------------------------#
 #Initialize frisbee object with appropriate coefficient values and initial conditions.
 #Current parameter input values obtained from Hummel 2003 (pg. 82)
-test_fris=frisbee_object_test.Frisbee(0,0,1,10,0,5,0,0,50,16,0.192,0)
+test_fris=frisbee_object_test.Frisbee(0.,0.,1.,10.,0.,5.,0.,0.,50.,16.,0.192,0.)
 test_fris.initialize_model(0.331,1.9124,0.1769,0.685,-0.0821,0.4338,-.005,-.0055,0.00171,0.0000071)
 
 #---------------------------------------------------------------------------------------------------#
@@ -21,7 +21,7 @@ test_fris.initialize_model(0.331,1.9124,0.1769,0.685,-0.0821,0.4338,-.005,-.0055
 
 def equations_of_motion(positions, t):
 
-	test_fris.x,test_fris.y,test_fris.z,test_fris.vx,test_fris.vz,test_fris.vz,test_fris.phi,test_fris.theta,test_fris.gamma,test_fris.phidot,test_fris.thetadot,test_fris.gammadot=positions[0:12]
+	test_fris.x,test_fris.y,test_fris.z,test_fris.vx,test_fris.vy,test_fris.vz,test_fris.phi,test_fris.theta,test_fris.gamma,test_fris.phidot,test_fris.thetadot,test_fris.gammadot=positions[0:12]
 
 	positionsdot=test_fris.derivatives_array()
 	return positionsdot

@@ -11,7 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 #---------------------------------------------------------------------------------------------------#
 #Initialize frisbee object with appropriate coefficient values and initial conditions.
 #Current parameter input values obtained from Hummel 2003 (pg. 82)
-test_fris=frisbee_object.Frisbee(1,2,3,4,5,6,7,8,9,10,11,12)
+test_fris=frisbee_object.Frisbee(0.,0.,1.,10.,0.,5.,0.,0.,50.,16.,0.192,0.)
 test_fris.initialize_model(0.331,1.9124,0.1769,0.685,-0.0821,0.4338,-.005,-.0055,0.00171,0.0000071)
 
 #---------------------------------------------------------------------------------------------------#
@@ -21,66 +21,57 @@ test_fris.initialize_model(0.331,1.9124,0.1769,0.685,-0.0821,0.4338,-.005,-.0055
 
 def equations_of_motion(positions, t):
 
-	x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot=positions[0:12]
+    test_fris.x,test_fris.y,test_fris.z,test_fris.vx,test_fris.vy,test_fris.vz,test_fris.phi,test_fris.theta,test_fris.gamma,test_fris.phidot,test_fris.thetadot,test_fris.gammadot=positions[0:12]
 
-	positionsdot=test_fris.derivatives_array()
-	return positionsdot
+    positionsdot=test_fris.derivatives_array()
+    return positionsdot
 
 #---------------------------------------------------------------------------------------------------#
 def main():
 
-	#Integration of ODEs that reflect equations of motion.
-	#Common release conditions obtained from Hummel 2003 (pg. 83)
+    #Integration of ODEs that reflect equations of motion.
+    #Common release conditions obtained from Hummel 2003 (pg. 83)
 
-	#Define initial conditions 
-	speed0=14 #(m/s), initial speed
-	beta0=0.105 #flight path angle in radians btw. velocity vector and horizontal
+    positions=np.array([test_fris.x,test_fris.y,test_fris.z,test_fris.vx,test_fris.vz,test_fris.vz,test_fris.phi,test_fris.theta,test_fris.gamma,test_fris.phidot,test_fris.thetadot,test_fris.gammadot])
 
-	x=0 #m, lab displacement in x direction
-	y=0 #m, lab displacement in y direction
-	z=1 #m, lab displacement in z direction
-	vx=10 #initial x component velocity
-	vy=0 #initial y component velocity
-	vz=5 #initial z component velocity 
-	phi=16 #radians, roll angle - corresponds to angle about x-axis
-	theta=0.192 #radians, pitch angle - corresponds to angle about y-axis
-	gamma=0 #radians, spin angle - corresponds to angle about z-xis
-	phidot=0 #radians/s, roll angular momentum
-	thetadot=0 #radians/s, pitch angular momentum
-	gammadot=50 #radians/s, spin angular momentum
+    #Define initial and final times
+    ti=1.0
+    tf=5.0
 
-	positions=np.array([x,y,z,vx,vz,vz,phi,theta,gamma,phidot,thetadot,gammadot])
+    #Define number of steps and calculate step size
+    n=1000.0 #number of steps
+    dt=(tf-ti)/n
 
-	#Define initial and final times
-	ti=1.0
-	tf=5.0
+    #Create time array
+    time=np.linspace(ti,tf, n)
 
-	#Define number of steps and calculate step size
-	n=100.0 #number of steps
-	dt=(tf-ti)/n
-
-	#Create time array
-	time=np.linspace(ti,tf, n)
-
-	solution=odeint(equations_of_motion, positions, time)
-	
-	print(solution)
+    solution=odeint(equations_of_motion, positions, time)
+    
+    print(solution)
 
 #---------------------------------------------------------------------------------------------------#
 
-	#Graph solutions to analyze relevance and assess code.
-	for i in range(12):
-		derivativenames=(['x-Position (m)','y-Position (m)','z-Position (m)','vx (x-velocity (m/s))','vy (y-velocity (m/s))','vz (z-velocity (m/s))',
-			'Phi','Theta','Gamma','phidot (phi angular velocity (radians/s))','thetadot (theta angular velocity (radians/s))',
-			'gammadot (gamma angular velocity (radians/s))'])
-		fig=plt.figure()
-		plt.plot(time, solution[:,i])
-		plt.ylabel(derivativenames[i])
-		plt.xlabel('Time (Seconds)')
-		plt.draw()
-		plt.pause(1)
-		raw_input('Press enter to close.')
-		plt.close(fig)
+    #Graph solutions to analyze relevance and assess code.
+    
+    '''
+    for i in range(12):
+        derivativenames=(['x-Position (m)','y-Position (m)','z-Position (m)','vx (x-velocity (m/s))','vy (y-velocity (m/s))','vz (z-velocity (m/s))',
+            'Phi','Theta','Gamma','phidot (phi angular velocity (radians/s))','thetadot (theta angular velocity (radians/s))',
+            'gammadot (gamma angular velocity (radians/s))'])
+        fig=plt.figure()
+        plt.plot(time, solution[:,i])
+        plt.ylabel(derivativenames[i])
+        plt.xlabel('Time (Seconds)')
+        plt.draw()
+        plt.pause(1)
+        raw_input('Press enter to close.')
+        plt.close(fig)
+    '''
+
+    fig=plt.figure()
+    ax=fig.add_subplot(111, projection='3d')
+    plt.plot(solution[0], solution[1], solution[2])
+    plt.show()
 
 if __name__ == '__main__':
     main()
