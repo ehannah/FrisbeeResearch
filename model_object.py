@@ -14,10 +14,11 @@ import math
 
 class Model(object):
 	def __init__(self, PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz):
-		self.PL0=PL0 #lift paramter for alpha=0, constant value 
-		self.PLa=PLa #lift parameter corresponding angle of attack
-		self.PD0=PD0 #drag parameter at alpha=alpha_0 (minimum value of alpha)
-		self.PDa=PDa #drag parameter corresponding to angle of attack
+		self.PL0=PL0 #lift paramter for alpha=0, constant value (y-intercept in linear approximation)
+		self.PLa=PLa #lift parameter corresponding angle of attack (slope in linear approximation)
+		self.PD0=PD0 #"form drag,"" i.e. drag parameter at alpha=alpha_0, where alpha_0 is angle of attack
+		#that produces zero lift and minimum drag
+		self.PDa=PDa #"induced drag," i.e. drag parameter corresponding to angle of attack not equal to alpha_0 
 		self.PTy0=PTy0 #y-body torque parameter (pitch) at alpha=0
 		self.PTya=PTya #y-body torque parameter corresponding to alpha
 		self.PTywy=PTywy #y-body torque parameter corresponding to y-direction angular velocity
@@ -33,15 +34,17 @@ class Model(object):
 #---------------------------------------------------------------------------------------------------#
 	
 	#Calculate total lift coefficient 
+	#Lift coefficient is a linear function of alpha
 	def coef_lift(self, alpha):
 		return self.PL0+self.PLa*alpha
 
 #---------------------------------------------------------------------------------------------------#
 
 	#Calculate total drag coefficient
-
+	#Drag coefficient is a quadratic function of alpha
+	#Note that drag force is never equal to zero
 	def coef_drag(self,alpha):
-		return self.PD0+self.PDa*(alpha-self.alpha_0)*(alpha-self.alpha_0)
+		return self.PD0+self.PDa*((alpha-self.alpha_0)**2)
 
 	'''
 	For torque coefficient equations, see pg. 12 equn. 2.8b, Hummel 2003

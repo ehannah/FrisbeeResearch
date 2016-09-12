@@ -12,10 +12,10 @@ Ixx=Iyy=Ixy=0.00122 #kg-m^2
 #---------------------------------------------------------------------------------------------------#
 
 #Create a Frisbee class, and assign Frisbee self values that correspond 
-#to physical characteristics of the frisbee.
+#to initial conditions (positions) of the frisbee.
 class Frisbee(object):
   def __init__(self,x,y,z,vx,vy,vz,phidot,thetadot,gammadot,phi,theta,gamma):
-    self.x=x
+    self.x=x 
     self.y=y
     self.z=z
     self.vx=vx
@@ -28,9 +28,7 @@ class Frisbee(object):
     self.theta=theta
     self.gamma=gamma
     self.velocity=np.array([vx,vy,vz])
-    self.area=0.057 #m^2, surface area of Discraft Ultrastar (Hummel 2003)
-    self.diameter=0.269 #m, diameter of Discraft Ultrastar (Hummel 2003)
-
+    
   #Represent Frisbee object by printing instantaneous position and velocity.
   def __str__(self):
     return "Position: (%f,%f,%f)\n"%(self.x,self.y,self.z)+"Velocity: (%f,%f,%f)\n"%(self.vx,self.vy,self.vz)
@@ -49,6 +47,7 @@ class Frisbee(object):
   		[math.sin(self.theta), 0, math.cos(self.theta)]])
 
 #---------------------------------------------------------------------------------------------------#
+
   #DECIDE WHETHER LAB-->FRIS ROTATION OR VICE VERSA
   
   #Below are unit important unit vectors which we will ultimately use to orient the forces
@@ -72,11 +71,11 @@ class Frisbee(object):
   #of the plane of the disc, which is distinct from the direction of the disc's velocity
   def xbhat(self):
     zcomponent=np.dot(self.velocity,self.zbhat()) #This is the lab-frame velocity vector
-    #dotted with the frisbee-frame z-body unit vector
-    vplane=self.velocity-self.zbhat()*zcomponent #Velocity in the plane of the disc's motion
+    #dotted with the lab z-body unit vector
+    vplane=self.velocity-(self.zbhat()*zcomponent) #Velocity in the plane of the disc's motion
     return vplane/np.linalg.norm(vplane) #Unit vector in direction of plane of disc
 
-  #Calculate unit vector in y-body direction
+  #Calculate unit vector in y-body direction, also expressed in lab frame.
   def ybhat(self):
     return np.cross(self.zbhat(),self.xbhat())
 
@@ -92,8 +91,8 @@ class Frisbee(object):
   #in the plane of the disc, which we calculate using an arctan function.
   def attackangle(self):
     zcomponent=np.dot(self.velocity,self.zbhat())
-    v_plane=self.velocity-self.zbhat()*zcomponent
-    return math.atan(zcomponent/(np.linalg.norm(v_plane)))
+    v_plane=self.velocity-(self.zbhat()*zcomponent)
+    return -math.atan(zcomponent/(np.linalg.norm(v_plane)))
 
 #---------------------------------------------------------------------------------------------------#
 
@@ -110,7 +109,7 @@ class Frisbee(object):
     alpha=self.attackangle()
     velocity=self.velocity_dot()
 
-    F_lift=self.model.coef_lift(alpha)*0.5*rho*area*velocity*np.cross(self.vhat(),self.ybhat())
+    F_lift=self.model.coef_lift(alpha)*0.5*rho*area*velocity*-np.cross(self.vhat(),self.ybhat())
 
     F_drag=self.model.coef_drag(alpha)*0.5*rho*area*velocity*-self.vhat()
 
@@ -126,7 +125,7 @@ class Frisbee(object):
   #Calculate angular velocities in Frisbee frame using equation from Hummel 2003 (pg. 34)
 
   def ang_velocity_frisframe(self):
-    return np.array([self.phidot*math.cos(self.theta), self.thetadot, self.phidot*math.sin(self.theta)])
+    return np.array([self.phidot*math.cos(self.theta), self.thetadot, (self.phidot*math.sin(self.theta)+self.gammadot)])
 
   #Calculate angular velocities in lab frame by taking dot product of angular_velocity_frisframe
   #array and rotation matrix.
@@ -166,7 +165,6 @@ class Frisbee(object):
 
     #Total torque - (SEE IMPORTANT NOTE IN TOM'S CODE!)
     total_torque=np.dot(self.rotationmatrix(),roll_moment)+np.dot(self.rotationmatrix(),pitch_moment)+spin_moment
-
     return total_torque
 #---------------------------------------------------------------------------------------------------#
   #Calculate derivatives of phidot, thetadot, and gammadot, which correspond to angular acceleration
@@ -178,12 +176,12 @@ class Frisbee(object):
 
     phi_dd=(total_torque[0] + Ixy*self.thetadot*self.phidot*math.sin(self.theta) - 
       Izz*self.thetadot*(self.phidot*math.sin(self.theta)+self.gammadot) + 
-      Ixy*self.thetadot*self.phidot*math.sin(self.theta)*math.cos(self.theta)/Ixy)
+      Ixy*self.thetadot*self.phidot*math.sin(self.theta))*math.cos(self.theta)/Ixy
 
     theta_dd=(total_torque[1]+ Izz*self.phidot*math.cos(self.theta)*(self.phidot*math.sin(self.theta)+
-      self.gammadot)-Iyy*(self.phidot**2)*math.cos(self.theta)*math.sin(self.theta)/Ixy)
+      self.gammadot)-Iyy*(self.phidot**2)*math.cos(self.theta)*math.sin(self.theta))/Ixy
 
-    gamma_dd=(total_torque[2] -Izz*phi_dd*math.sin(self.theta)+self.thetadot*self.phidot*math.cos(self.theta)/Izz)
+    gamma_dd=(total_torque[2] -Izz*phi_dd*math.sin(self.theta)+self.thetadot*self.phidot*math.cos(self.theta))/Izz
 
     return np.array([phi_dd, theta_dd, gamma_dd])
 #---------------------------------------------------------------------------------------------------#

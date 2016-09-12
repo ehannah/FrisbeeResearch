@@ -21,8 +21,16 @@ test_fris.initialize_model(0.331,1.9124,0.1769,0.685,-0.0821,0.4338,-.005,-.0055
 
 def equations_of_motion(positions, t):
 
-    test_fris.x,test_fris.y,test_fris.z,test_fris.vx,test_fris.vy,test_fris.vz,test_fris.phi,test_fris.theta,test_fris.gamma,test_fris.phidot,test_fris.thetadot,test_fris.gammadot=positions[0:12]
+    #Current positions
+    (test_fris.x,test_fris.y,test_fris.z,
+        #Current velocities
+        test_fris.vx,test_fris.vy,test_fris.vz,
+        #Current angular positions
+        test_fris.phi,test_fris.theta,test_fris.gamma,
+        #Current angular velocities
+        test_fris.phidot,test_fris.thetadot,test_fris.gammadot)=positions[0:12]
 
+    #Calculate all derivatives based on current positions. Return array of derivatives.
     positionsdot=test_fris.derivatives_array()
     return positionsdot
 
@@ -32,7 +40,12 @@ def main():
     #Integration of ODEs that reflect equations of motion.
     #Common release conditions obtained from Hummel 2003 (pg. 83)
 
-    positions=np.array([test_fris.x,test_fris.y,test_fris.z,test_fris.vx,test_fris.vz,test_fris.vz,test_fris.phi,test_fris.theta,test_fris.gamma,test_fris.phidot,test_fris.thetadot,test_fris.gammadot])
+    #List of initial conditions to feed to equations_of_motion function.
+    #Ordered in same manner as 'positions' array above
+    positions=np.array([test_fris.x,test_fris.y,test_fris.z,
+        test_fris.vx,test_fris.vz,test_fris.vz,
+        test_fris.phi,test_fris.theta,test_fris.gamma,
+        test_fris.phidot,test_fris.thetadot,test_fris.gammadot])
 
     #Define initial and final times
     ti=1.0
@@ -53,7 +66,7 @@ def main():
 
     #Graph solutions to analyze relevance and assess code.
     
-    '''
+
     for i in range(12):
         derivativenames=(['x-Position (m)','y-Position (m)','z-Position (m)','vx (x-velocity (m/s))','vy (y-velocity (m/s))','vz (z-velocity (m/s))',
             'Phi','Theta','Gamma','phidot (phi angular velocity (radians/s))','thetadot (theta angular velocity (radians/s))',
@@ -66,12 +79,13 @@ def main():
         plt.pause(1)
         raw_input('Press enter to close.')
         plt.close(fig)
-    '''
-
+    
     fig=plt.figure()
     ax=fig.add_subplot(111, projection='3d')
     plt.plot(solution[0], solution[1], solution[2])
     plt.show()
+    raw_input('Press enter to close.')
+
 
 if __name__ == '__main__':
     main()
