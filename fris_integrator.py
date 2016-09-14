@@ -43,16 +43,16 @@ def main():
     #List of initial conditions to feed to equations_of_motion function.
     #Ordered in same manner as 'positions' array above
     positions=np.array([test_fris.x,test_fris.y,test_fris.z,
-        test_fris.vx,test_fris.vz,test_fris.vz,
+        test_fris.vx,test_fris.vy,test_fris.vz,
         test_fris.phi,test_fris.theta,test_fris.gamma,
         test_fris.phidot,test_fris.thetadot,test_fris.gammadot])
 
     #Define initial and final times
-    ti=1.0
-    tf=5.0
+    ti=0.0
+    tf=1.0
 
     #Define number of steps and calculate step size
-    n=1000.0 #number of steps
+    n=3.0 #number of steps
     dt=(tf-ti)/n
 
     #Create time array

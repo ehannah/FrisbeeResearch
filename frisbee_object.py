@@ -14,7 +14,7 @@ Ixx=Iyy=Ixy=0.00122 #kg-m^2
 #Create a Frisbee class, and assign Frisbee self values that correspond 
 #to initial conditions (positions) of the frisbee.
 class Frisbee(object):
-  def __init__(self,x,y,z,vx,vy,vz,phidot,thetadot,gammadot,phi,theta,gamma):
+  def __init__(self,x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot):
     self.x=x 
     self.y=y
     self.z=z
