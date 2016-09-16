@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.integrate import odeint #Integrates a system of ordinary differential equations given initial conditions.
 import math
-import frisbee_object
+import frisbee_object as frisbee_object
 import model_object
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -11,8 +11,11 @@ from mpl_toolkits.mplot3d import Axes3D
 #---------------------------------------------------------------------------------------------------#
 #Initialize frisbee object with appropriate coefficient values and initial conditions.
 #Current parameter input values obtained from Hummel 2003 (pg. 82)
-test_fris=frisbee_object.Frisbee(0.,0.,1.,10.,0.,5.,0.,0.,50.,16.,0.192,0.)
-test_fris.initialize_model(0.331,1.9124,0.1769,0.685,-0.0821,0.4338,-.005,-.0055,0.00171,0.0000071)
+test_fris=frisbee_object.Frisbee(0.,0.,1.,20.,0.,0.,0.,-.087,0.,0.,0.,50.)
+test_fris.initialize_model(0.331,1.9124,0.1769,0.685,0.0821,0.4338,0.0144,0.0125,0.00171,0.0000341)
+#print(test_fris.get_force())
+#print(test_fris.get_torque())
+print(test_fris.derivatives_array())
 
 #---------------------------------------------------------------------------------------------------#
 #Define function to feed into ODE integrator. The function will compute all relevant derivatives
@@ -49,24 +52,31 @@ def main():
 
     #Define initial and final times
     ti=0.0
-    tf=1.0
+    tf=0.010
 
     #Define number of steps and calculate step size
-    n=3.0 #number of steps
-    dt=(tf-ti)/n
+    n=2 #number of steps
+    #dt=(tf-ti)/(n-1)
 
     #Create time array
     time=np.linspace(ti,tf, n)
 
-    solution=odeint(equations_of_motion, positions, time)
-    
-    print(solution)
+    import sys
+    sys.exit()
+    #print "Running equations of motion once"
+    #print equations_of_motion(positions,time)
+    #solution=odeint(equations_of_motion, positions, time)
 
+    print time
+    print solution
+    
+    #print(solution)
+    np.savetxt("solution.txt",solution)
 #---------------------------------------------------------------------------------------------------#
 
     #Graph solutions to analyze relevance and assess code.
     
-
+    
     for i in range(12):
         derivativenames=(['x-Position (m)','y-Position (m)','z-Position (m)','vx (x-velocity (m/s))','vy (y-velocity (m/s))','vz (z-velocity (m/s))',
             'Phi','Theta','Gamma','phidot (phi angular velocity (radians/s))','thetadot (theta angular velocity (radians/s))',
@@ -75,17 +85,16 @@ def main():
         plt.plot(time, solution[:,i])
         plt.ylabel(derivativenames[i])
         plt.xlabel('Time (Seconds)')
-        plt.draw()
-        plt.pause(1)
-        raw_input('Press enter to close.')
+        #plt.draw()
+        #plt.pause(1)
+        #raw_input('Press enter to close.')
         plt.close(fig)
     
     fig=plt.figure()
     ax=fig.add_subplot(111, projection='3d')
-    plt.plot(solution[0], solution[1], solution[2])
+    plt.plot(solution[:,0], solution[:,1], solution[:,2])
     plt.show()
     raw_input('Press enter to close.')
-
 
 if __name__ == '__main__':
     main()

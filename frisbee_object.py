@@ -5,7 +5,7 @@ import model_object
 
 rho=1.225 #kg/m^3, density of air
 area=0.057 #m^2, area of disc used in Hummel 2003
-m=1.25 #kg, mass of disc used in Hummel 2003
+m=.175 #kg, mass of disc used in Hummel 2003
 g=9.81 #m/s^2, gravitational acceleration
 Izz=0.00235 #kg-m^2
 Ixx=Iyy=Ixy=0.00122 #kg-m^2
@@ -14,7 +14,7 @@ Ixx=Iyy=Ixy=0.00122 #kg-m^2
 #Create a Frisbee class, and assign Frisbee self values that correspond 
 #to initial conditions (positions) of the frisbee.
 class Frisbee(object):
-  def __init__(self,x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot):
+  def __init__(self,x,y,z,vx,vy,vz,phi,theta,gamma, phidot,thetadot,gammadot):
     self.x=x 
     self.y=y
     self.z=z
@@ -91,14 +91,17 @@ class Frisbee(object):
   #in the plane of the disc, which we calculate using an arctan function.
   def attackangle(self):
     zcomponent=np.dot(self.velocity,self.zbhat())
+    print "zbhat = ",self.zbhat()
     v_plane=self.velocity-(self.zbhat()*zcomponent)
+    #print(zcomponent)
+    #print(v_plane)
+    #print(np.linalg.norm(v_plane))
     return -math.atan(zcomponent/(np.linalg.norm(v_plane)))
 
 #---------------------------------------------------------------------------------------------------#
 
   #Calculate dot product of velocity vector, by which we multiply forces.
   def velocity_dot(self):
-
     return np.dot(self.velocity,self.velocity)
 
 #---------------------------------------------------------------------------------------------------#
@@ -107,16 +110,23 @@ class Frisbee(object):
   def get_force(self):
 
     alpha=self.attackangle()
-    velocity=self.velocity_dot()
-
-    F_lift=self.model.coef_lift(alpha)*0.5*rho*area*velocity*-np.cross(self.vhat(),self.ybhat())
-
-    F_drag=self.model.coef_drag(alpha)*0.5*rho*area*velocity*-self.vhat()
-
-    F_gravity=m*g*np.array([0,0,-1])
-    
+    v2=self.velocity_dot()
+    F_lift=self.model.coef_lift(alpha)*0.5*rho*area*v2*np.cross(self.vhat(),self.ybhat())
+    F_drag=self.model.coef_drag(alpha)*0.5*rho*area*v2*(-self.vhat())
+    F_gravity=m*g*np.array([0.,0.,-1.])
     total_force=F_lift+F_drag+F_gravity
-
+    #print(alpha)
+    #print(self.model.PL0, self.model.PLa, self.model.PD0, self.model.PDa)
+    print('lift amplitude ', self.model.coef_lift(alpha)*0.5*rho*area*v2)
+    print self.model.PL0, self.model.PLa
+    print ('alpha ', alpha)
+    print('lift coefficient ', self.model.coef_lift(alpha))
+    print('force amplitude ', 0.5*rho*area*v2)
+    print('unit vector ', np.cross(self.vhat(),self.ybhat()))
+    #print(self.model.coef_drag(alpha))
+    print('lift ',F_lift)
+    #print('drag ',F_drag)
+    #print('gravity', F_gravity)
     return total_force
 
 #---------------------------------------------------------------------------------------------------#
@@ -149,19 +159,20 @@ class Frisbee(object):
 
     #Calculate alpha and velocity dot product
     alpha=self.attackangle()
-    velocity=self.velocity_dot()
+    v2=self.velocity_dot()
 
     #Get x,y,z components of angular velocityfrom unit_ang_velocity function
+    av_unit = self.unit_ang_velocity()
     wxb=self.unit_ang_velocity()[0]
     wyb=self.unit_ang_velocity()[1]
     wzb=self.unit_ang_velocity()[2]
 
     #X-body torque
-    roll_moment=self.model.coef_roll(wxb,wxb)*0.5*rho*area*velocity*self.xbhat()
+    roll_moment=self.model.coef_roll(wxb,wzb)*0.5*rho*area*v2*self.xbhat()
     #Y-body torque
-    pitch_moment=self.model.coef_pitch(alpha,wyb)*0.5*rho*area*velocity*self.ybhat()
+    pitch_moment=self.model.coef_pitch(alpha,wyb)*0.5*rho*area*v2*self.ybhat()
     #Z-body torque
-    spin_moment=self.model.coef_spin(wzb)*0.5*rho*area*velocity*np.array([0,0,1])
+    spin_moment=self.model.coef_spin(wzb)*0.5*rho*area*v2*np.array([0,0,1])
 
     #Total torque - (SEE IMPORTANT NOTE IN TOM'S CODE!)
     total_torque=np.dot(self.rotationmatrix(),roll_moment)+np.dot(self.rotationmatrix(),pitch_moment)+spin_moment
@@ -173,15 +184,23 @@ class Frisbee(object):
   def ang_acceleration(self):
 
     total_torque=self.get_torque()
+    st = math.sin(self.theta)
+    ct = math.cos(self.theta)
 
-    phi_dd=(total_torque[0] + Ixy*self.thetadot*self.phidot*math.sin(self.theta) - 
-      Izz*self.thetadot*(self.phidot*math.sin(self.theta)+self.gammadot) + 
-      Ixy*self.thetadot*self.phidot*math.sin(self.theta))*math.cos(self.theta)/Ixy
+    phi_dd=total_torque[0] + Ixy*self.thetadot*self.phidot*st - \
+      Izz*self.thetadot*(self.phidot*st+self.gammadot) + \
+      Ixy*self.thetadot*self.phidot*st
+    phi_dd *= ct/Ixy
 
-    theta_dd=(total_torque[1]+ Izz*self.phidot*math.cos(self.theta)*(self.phidot*math.sin(self.theta)+
-      self.gammadot)-Iyy*(self.phidot**2)*math.cos(self.theta)*math.sin(self.theta))/Ixy
+    theta_dd=total_torque[1]+ Izz*self.phidot*ct*(self.phidot*st+ \
+      self.gammadot)-Ixy*self.phidot**2*ct*st
+    theta_dd /= Ixy
 
-    gamma_dd=(total_torque[2] -Izz*phi_dd*math.sin(self.theta)+self.thetadot*self.phidot*math.cos(self.theta))/Izz
+    gamma_dd=total_torque[2] -Izz*phi_dd*st+self.thetadot*self.phidot*ct
+    gamma_dd /= Izz
+
+    #print "phidd = %e\ntheta_dd=%e\ngamma_dd=%e\n\n"%(phi_dd,theta_dd,gamma_dd)
+    #print total_torque
 
     return np.array([phi_dd, theta_dd, gamma_dd])
 #---------------------------------------------------------------------------------------------------#
@@ -193,8 +212,11 @@ class Frisbee(object):
     #phi ang. acceleration, theta ang. acceleration, gamma ang. acceleration]
 
   def derivatives_array(self):
+    forces = self.get_force()
+    print forces
+    ang_acc = self.ang_acceleration()
     return [self.vx, self.vy, self.vz,
-      self.get_force()[0]/m, self.get_force()[1]/m, self.get_force()[2]/m,
+      forces[0]/m, forces[1]/m, forces[2]/m,
       self.phidot, self.thetadot, self.gammadot,
-      self.ang_acceleration()[0], self.ang_acceleration()[1], self.ang_acceleration()[2]]
+      ang_acc[0], ang_acc[1], ang_acc[2]]
 
