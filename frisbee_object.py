@@ -9,6 +9,7 @@ m=.175 #kg, mass of disc used in Hummel 2003
 g=9.81 #m/s^2, gravitational acceleration
 Izz=0.00235 #kg-m^2
 Ixx=Iyy=Ixy=0.00122 #kg-m^2
+d=2*(area/math.pi)**0.5 ##m; diameter of disc
 #---------------------------------------------------------------------------------------------------#
 
 #Create a Frisbee class, and assign Frisbee self values that correspond 
@@ -41,10 +42,14 @@ class Frisbee(object):
   #Calculate rotation matrix. Rotation matrix is the product Rz*Ry of "Euler Chained Rotation
   #Matrices", found at https://en.wikipedia.org/wiki/Davenport_chained_rotations. 
   def rotationmatrix(self):
+    phi=self.phi 
+    theta=self.theta
+    
+
     return np.array(
-  		[[math.cos(self.phi)*math.cos(self.theta), -math.sin(self.phi), -math.cos(self.phi)*math.sin(self.theta)],
-  		[math.sin(self.phi)*math.cos(self.theta), math.cos(self.phi), -math.sin(self.theta)*math.sin(self.phi)],
-  		[math.sin(self.theta), 0, math.cos(self.theta)]])
+  		[[math.cos(theta), math.sin(phi)*math.sin(theta), -math.sin(theta)*math.cos(phi)],
+      [0, math.cos(phi), math.sin(phi)],
+  		[math.sin(theta), -math.sin(phi)*math.cos(theta), math.cos(phi)*math.cos(theta)]])
 
 #---------------------------------------------------------------------------------------------------#
 
@@ -65,7 +70,7 @@ class Frisbee(object):
   #using np.fliplr(), which flips an array in the left/right direction.
 
   def zbhat(self):
-    return np.fliplr(self.rotationmatrix())[0] #([001])
+    return self.rotationmatrix()[2] #([001])
 
   #Calculate unit vector in x-body direction. Corresponds to unit vector in the direction
   #of the plane of the disc, which is distinct from the direction of the disc's velocity
@@ -91,11 +96,7 @@ class Frisbee(object):
   #in the plane of the disc, which we calculate using an arctan function.
   def attackangle(self):
     zcomponent=np.dot(self.velocity,self.zbhat())
-    print "zbhat = ",self.zbhat()
     v_plane=self.velocity-(self.zbhat()*zcomponent)
-    #print(zcomponent)
-    #print(v_plane)
-    #print(np.linalg.norm(v_plane))
     return -math.atan(zcomponent/(np.linalg.norm(v_plane)))
 
 #---------------------------------------------------------------------------------------------------#
@@ -115,18 +116,7 @@ class Frisbee(object):
     F_drag=self.model.coef_drag(alpha)*0.5*rho*area*v2*(-self.vhat())
     F_gravity=m*g*np.array([0.,0.,-1.])
     total_force=F_lift+F_drag+F_gravity
-    #print(alpha)
-    #print(self.model.PL0, self.model.PLa, self.model.PD0, self.model.PDa)
-    print('lift amplitude ', self.model.coef_lift(alpha)*0.5*rho*area*v2)
-    print self.model.PL0, self.model.PLa
-    print ('alpha ', alpha)
-    print('lift coefficient ', self.model.coef_lift(alpha))
-    print('force amplitude ', 0.5*rho*area*v2)
-    print('unit vector ', np.cross(self.vhat(),self.ybhat()))
-    #print(self.model.coef_drag(alpha))
-    print('lift ',F_lift)
-    #print('drag ',F_drag)
-    #print('gravity', F_gravity)
+
     return total_force
 
 #---------------------------------------------------------------------------------------------------#
@@ -168,11 +158,11 @@ class Frisbee(object):
     wzb=self.unit_ang_velocity()[2]
 
     #X-body torque
-    roll_moment=self.model.coef_roll(wxb,wzb)*0.5*rho*area*v2*self.xbhat()
+    roll_moment=self.model.coef_roll(wxb,wzb)*0.5*rho*d*area*v2*self.xbhat()
     #Y-body torque
-    pitch_moment=self.model.coef_pitch(alpha,wyb)*0.5*rho*area*v2*self.ybhat()
+    pitch_moment=self.model.coef_pitch(alpha,wyb)*0.5*rho*d*area*v2*self.ybhat()
     #Z-body torque
-    spin_moment=self.model.coef_spin(wzb)*0.5*rho*area*v2*np.array([0,0,1])
+    spin_moment=self.model.coef_spin(wzb)*0.5*rho*d*area*v2*np.array([0,0,1])
 
     #Total torque - (SEE IMPORTANT NOTE IN TOM'S CODE!)
     total_torque=np.dot(self.rotationmatrix(),roll_moment)+np.dot(self.rotationmatrix(),pitch_moment)+spin_moment
@@ -186,21 +176,21 @@ class Frisbee(object):
     total_torque=self.get_torque()
     st = math.sin(self.theta)
     ct = math.cos(self.theta)
+    phidot=self.phidot
+    thetadot=self.thetadot
+    gammadot=self.gammadot
 
-    phi_dd=total_torque[0] + Ixy*self.thetadot*self.phidot*st - \
-      Izz*self.thetadot*(self.phidot*st+self.gammadot) + \
-      Ixy*self.thetadot*self.phidot*st
-    phi_dd *= ct/Ixy
+    phi_dd=total_torque[0] + 2*Ixy*thetadot*phidot*st - \
+      Izz*thetadot*(phidot*st+gammadot)
+    phi_dd /= ct*Ixy
 
-    theta_dd=total_torque[1]+ Izz*self.phidot*ct*(self.phidot*st+ \
-      self.gammadot)-Ixy*self.phidot**2*ct*st
+    theta_dd=total_torque[1]+ Izz*phidot*ct*(phidot*st+ \
+      gammadot)-Ixy*phidot**2*ct*st
     theta_dd /= Ixy
 
-    gamma_dd=total_torque[2] -Izz*phi_dd*st+self.thetadot*self.phidot*ct
+    gamma_dd=total_torque[2] -Izz*(phidot*thetadot*ct-phi_dd*st)
     gamma_dd /= Izz
 
-    #print "phidd = %e\ntheta_dd=%e\ngamma_dd=%e\n\n"%(phi_dd,theta_dd,gamma_dd)
-    #print total_torque
 
     return np.array([phi_dd, theta_dd, gamma_dd])
 #---------------------------------------------------------------------------------------------------#
@@ -213,7 +203,6 @@ class Frisbee(object):
 
   def derivatives_array(self):
     forces = self.get_force()
-    print forces
     ang_acc = self.ang_acceleration()
     return [self.vx, self.vy, self.vz,
       forces[0]/m, forces[1]/m, forces[2]/m,
