@@ -180,15 +180,13 @@ class Frisbee(object):
     thetadot=self.thetadot
     gammadot=self.gammadot
 
-    phi_dd=total_torque[0] + 2*Ixy*thetadot*phidot*st - \
-      Izz*thetadot*(phidot*st+gammadot)
+    phi_dd=total_torque[0] + 2*Ixy*thetadot*phidot*st - Izz*thetadot*(phidot*st+gammadot)
     phi_dd /= ct*Ixy
 
-    theta_dd=total_torque[1]+ Izz*phidot*ct*(phidot*st+ \
-      gammadot)-Ixy*phidot**2*ct*st
+    theta_dd=total_torque[1] + Izz*phidot*ct*(phidot*st+gammadot) - Ixy*phidot**2*ct*st
     theta_dd /= Ixy
 
-    gamma_dd=total_torque[2] -Izz*(phidot*thetadot*ct-phi_dd*st)
+    gamma_dd=total_torque[2] - Izz*(phidot*thetadot*ct + phi_dd*st)
     gamma_dd /= Izz
 
 

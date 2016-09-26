@@ -15,7 +15,7 @@ test_fris=frisbee_object.Frisbee(0.,0.,1.,20.,0.,0.,0.,-.087,0.,0.,0.,50.)
 test_fris.initialize_model(0.331,1.9124,0.1769,0.685,0.0821,0.4338,0.0144,0.0125,0.00171,0.0000341)
 #print(test_fris.get_force())
 #print(test_fris.get_torque())
-print(test_fris.derivatives_array())
+print("Initial derivatives: ",test_fris.derivatives_array())
 
 #---------------------------------------------------------------------------------------------------#
 #Define function to feed into ODE integrator. The function will compute all relevant derivatives
