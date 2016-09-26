@@ -15,7 +15,7 @@ d=2*(area/math.pi)**0.5 ##m; diameter of disc
 #Create a Frisbee class, and assign Frisbee self values that correspond 
 #to initial conditions (positions) of the frisbee.
 class Frisbee(object):
-  def __init__(self,x,y,z,vx,vy,vz,phi,theta,gamma, phidot,thetadot,gammadot):
+  def __init__(self,x,y,z,vx,vy,vz,phi,theta,gamma, phidot,thetadot,gammadot,debug=False):
     self.x=x 
     self.y=y
     self.z=z
@@ -29,6 +29,7 @@ class Frisbee(object):
     self.theta=theta
     self.gamma=gamma
     self.velocity=np.array([vx,vy,vz])
+    self.debug=debug #Default value is false if debug isn't specified.
     
   #Represent Frisbee object by printing instantaneous position and velocity.
   def __str__(self):
@@ -39,17 +40,19 @@ class Frisbee(object):
 
 #---------------------------------------------------------------------------------------------------#
 
-  #Calculate rotation matrix. Rotation matrix is the product Rz*Ry of "Euler Chained Rotation
+  #Calculate rotation matrix. Rotation matrix is the product Ry(theta)*Rx(phi) of "Euler Chained Rotation
   #Matrices", found at https://en.wikipedia.org/wiki/Davenport_chained_rotations. 
   def rotationmatrix(self):
     phi=self.phi 
     theta=self.theta
-    
+    ct = math.cos(theta)
+    st = math.sin(theta)
+    cp = math.cos(phi)
+    sp = math.sin(phi)
 
-    return np.array(
-  		[[math.cos(theta), math.sin(phi)*math.sin(theta), -math.sin(theta)*math.cos(phi)],
-      [0, math.cos(phi), math.sin(phi)],
-  		[math.sin(theta), -math.sin(phi)*math.cos(theta), math.cos(phi)*math.cos(theta)]])
+    return np.array([[ct, sp*st, -st*cp],
+                     [0, cp, sp],
+                     [st, -sp*ct, cp*ct]])
 
 #---------------------------------------------------------------------------------------------------#
 
@@ -131,13 +134,20 @@ class Frisbee(object):
   #array and rotation matrix.
 
   def ang_velocity_labframe(self):
-    return np.dot(self.rotationmatrix(),self.ang_velocity_frisframe())
+    #return np.dot(self.rotationmatrix(),self.ang_velocity_frisframe())
+    return np.dot(self.ang_velocity_frisframe(),self.rotationmatrix()) #I think I fixed the issue here - tom
+
 
   #Calculate the components of the lab frame angular velocities along body frame unit vectors
   def unit_ang_velocity(self):
-    wxb=np.dot(self.ang_velocity_labframe(), self.xbhat())
-    wyb=np.dot(self.ang_velocity_labframe(), self.ybhat())
-    wzb=np.dot(self.ang_velocity_labframe(), self.zbhat())
+    av_labframe = self.ang_velocity_labframe()
+    wxb=np.dot(av_labframe, self.xbhat())
+    wyb=np.dot(av_labframe, self.ybhat())
+    wzb=np.dot(av_labframe, self.zbhat())
+    if self.debug:
+      print "bhat vectors:",self.xbhat(), self.ybhat(), self.zbhat() #This is fine
+      print "Angular velocity in the frisbeeframe:",self.ang_velocity_frisframe()
+      print "Angular velocity in the labframe:    ",av_labframe #I think there is a minus sign issue here
     return wxb, wyb, wzb
 
 #---------------------------------------------------------------------------------------------------#
@@ -146,33 +156,45 @@ class Frisbee(object):
   #Calculate torques acting on Frisbee
 
   def get_torque(self):
-
     #Calculate alpha and velocity dot product
     alpha=self.attackangle()
     v2=self.velocity_dot()
 
     #Get x,y,z components of angular velocityfrom unit_ang_velocity function
     av_unit = self.unit_ang_velocity()
-    wxb=self.unit_ang_velocity()[0]
-    wyb=self.unit_ang_velocity()[1]
-    wzb=self.unit_ang_velocity()[2]
+    wxb=av_unit[0]
+    wyb=av_unit[1]
+    wzb=av_unit[2]
 
     #X-body torque
-    roll_moment=self.model.coef_roll(wxb,wzb)*0.5*rho*d*area*v2*self.xbhat()
+    roll_moment  = self.model.coef_roll(wxb,wzb)*0.5*rho*d*area*v2*self.xbhat()
     #Y-body torque
-    pitch_moment=self.model.coef_pitch(alpha,wyb)*0.5*rho*d*area*v2*self.ybhat()
+    pitch_moment = self.model.coef_pitch(alpha,wyb)*0.5*rho*d*area*v2*self.ybhat()
     #Z-body torque
-    spin_moment=self.model.coef_spin(wzb)*0.5*rho*d*area*v2*np.array([0,0,1])
+    spin_moment  = self.model.coef_spin(wzb)*0.5*rho*d*area*v2*np.array([0,0,1])
 
     #Total torque - (SEE IMPORTANT NOTE IN TOM'S CODE!)
-    total_torque=np.dot(self.rotationmatrix(),roll_moment)+np.dot(self.rotationmatrix(),pitch_moment)+spin_moment
+    rotation_matrix = self.rotationmatrix()
+    #NOTE FROM TOM - the dot products might have to be reversed compared to what you had before.
+    #We are looking for the angular accelartions of the angles, but need to work in the frisbee frame.
+    #Thus we reverse the dot product, since the moments are already in the lab frame (except the spin_moment)
+    #and thus by reversing the order we go back to the frisbee frame.
+    #total_torque=np.dot(rotation_matrix,roll_moment)+np.dot(rotation_matrix,pitch_moment)+spin_moment
+    total_torque=np.dot(roll_moment,rotation_matrix)+np.dot(pitch_moment,rotation_matrix)+spin_moment
+
+    if self.debug:
+      print "\nIn get_torque"
+      #Tom - got up to debugging here. There might be an issue in the following function.
+      print "Roll moment amplitude:",self.model.coef_roll(wxb,wzb)*0.5*rho*d*area*v2
+      print "w_b:",wxb, wyb, wzb
+      print "Moments:",roll_moment,pitch_moment,spin_moment
+      print "tau_vector:",total_torque
     return total_torque
 #---------------------------------------------------------------------------------------------------#
   #Calculate derivatives of phidot, thetadot, and gammadot, which correspond to angular acceleration
   #values for phi, theta, and gamma. Units are radians/sec^2. Equations can be found in Hummel 2003 (pg. 48)
 
   def ang_acceleration(self):
-
     total_torque=self.get_torque()
     st = math.sin(self.theta)
     ct = math.cos(self.theta)
@@ -189,6 +211,12 @@ class Frisbee(object):
     gamma_dd=total_torque[2] - Izz*(phidot*thetadot*ct + phi_dd*st)
     gamma_dd /= Izz
 
+    if self.debug:
+      print "\nIn ang_acceleration:"
+      print self.theta, st,ct #This part is fine
+      print phidot, thetadot, gammadot #This is fine
+      print Ixy,Izz #This is fine
+      print total_torque[0], total_torque[0]/(ct*Ixy) #This might be the issue
 
     return np.array([phi_dd, theta_dd, gamma_dd])
 #---------------------------------------------------------------------------------------------------#
