@@ -10,6 +10,7 @@ g=9.81 #m/s^2, gravitational acceleration
 Izz=0.00235 #kg-m^2
 Ixx=Iyy=Ixy=0.00122 #kg-m^2
 d=2*(area/math.pi)**0.5 ##m; diameter of disc
+print "DIAMETER:",d
 #---------------------------------------------------------------------------------------------------#
 
 #Create a Frisbee class, and assign Frisbee self values that correspond 
@@ -35,7 +36,7 @@ class Frisbee(object):
   def __str__(self):
     return "Position: (%f,%f,%f)\n"%(self.x,self.y,self.z)+"Velocity: (%f,%f,%f)\n"%(self.vx,self.vy,self.vz)
 
-  def initialize_model(self, PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz):
+  def initialize_model(self,      PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz):
     self.model=model_object.Model(PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz)
 
 #---------------------------------------------------------------------------------------------------#
@@ -100,6 +101,10 @@ class Frisbee(object):
   def attackangle(self):
     zcomponent=np.dot(self.velocity,self.zbhat())
     v_plane=self.velocity-(self.zbhat()*zcomponent)
+    if self.debug:
+      print "\nIn attackangle:"
+      print zcomponent
+      print v_plane
     return -math.atan(zcomponent/(np.linalg.norm(v_plane)))
 
 #---------------------------------------------------------------------------------------------------#
@@ -118,6 +123,17 @@ class Frisbee(object):
     F_lift=self.model.coef_lift(alpha)*0.5*rho*area*v2*np.cross(self.vhat(),self.ybhat())
     F_drag=self.model.coef_drag(alpha)*0.5*rho*area*v2*(-self.vhat())
     F_gravity=m*g*np.array([0.,0.,-1.])
+    if self.debug:
+      print "\nIn get_forces"
+      print "CL:",self.model.coef_lift(alpha)
+      print "CD:",self.model.coef_drag(alpha)
+      print "Amplitude:",0.5*rho*area*v2
+
+      print "alpha, v2:",alpha,v2
+      print "F_lift:",F_lift
+      print "F_drag:",F_drag
+      print "F_grav:",F_gravity
+      
     total_force=F_lift+F_drag+F_gravity
 
     return total_force
@@ -184,11 +200,11 @@ class Frisbee(object):
 
     if self.debug:
       print "\nIn get_torque"
-      #Tom - got up to debugging here. There might be an issue in the following function.
-      print "Roll moment amplitude:",self.model.coef_roll(wxb,wzb)*0.5*rho*d*area*v2
+      print "PitchMoment:",pitch_moment
+      print "Pitch moment amplitude:",self.model.coef_pitch(alpha,wyb)
       print "w_b:",wxb, wyb, wzb
       print "Moments:",roll_moment,pitch_moment,spin_moment
-      print "tau_vector:",total_torque
+      print "total_torque:",total_torque
     return total_torque
 #---------------------------------------------------------------------------------------------------#
   #Calculate derivatives of phidot, thetadot, and gammadot, which correspond to angular acceleration
@@ -215,8 +231,10 @@ class Frisbee(object):
       print "\nIn ang_acceleration:"
       print self.theta, st,ct #This part is fine
       print phidot, thetadot, gammadot #This is fine
-      print Ixy,Izz #This is fine
-      print total_torque[0], total_torque[0]/(ct*Ixy) #This might be the issue
+      print "I:",Ixy,Izz #This is fine
+      #print total_torque[0], total_torque[0]/(ct*Ixy) #This might be the issue
+      print "theta_dd",theta_dd
+      print "total_torque[1]",total_torque[1],Izz*phidot*ct*(phidot*st+gammadot), Ixy*phidot**2*ct*st
 
     return np.array([phi_dd, theta_dd, gamma_dd])
 #---------------------------------------------------------------------------------------------------#
@@ -230,6 +248,11 @@ class Frisbee(object):
   def derivatives_array(self):
     forces = self.get_force()
     ang_acc = self.ang_acceleration()
+    if self.debug:
+      print "\nIn derivatives_array:"
+      print "mass:",m
+      print "forces: ",forces
+      print "torques:",ang_acc
     return [self.vx, self.vy, self.vz,
       forces[0]/m, forces[1]/m, forces[2]/m,
       self.phidot, self.thetadot, self.gammadot,

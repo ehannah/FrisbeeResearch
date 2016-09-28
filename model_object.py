@@ -25,7 +25,7 @@ class Model(object):
 		self.PTxwx=PTxwx #torque parameter for x direction, corresponds to x angular velocity
 		self.PTxwz=PTxwz #torque parameter for x direciton, corresponds to z angular velocity
 		self.PTzwz=PTzwz #torque parameter for z direction, corresponds to z angular velocity
-		self.alpha_0=-math.pi/45. #radians (-4 degrees), constant value reported in Hummel 2003
+		self.alpha_0=4.*math.pi/180. #radians (4 degrees), constant value reported in Hummel 2003
 
 	#Print frisbee parameters 
 	def __str__(self):
@@ -36,6 +36,8 @@ class Model(object):
 	#Calculate total lift coefficient 
 	#Lift coefficient is a linear function of alpha
 	def coef_lift(self, alpha):
+		#print "\nIn coef_lift"
+		#print self.PL0,self.PLa,alpha
 		return self.PL0+self.PLa*alpha
 
 #---------------------------------------------------------------------------------------------------#
@@ -44,6 +46,8 @@ class Model(object):
 	#Drag coefficient is a quadratic function of alpha
 	#Note that drag force is never equal to zero
 	def coef_drag(self,alpha):
+		#print "\nIn coef_drag"
+		#print self.PD0,self.PDa,alpha,self.alpha_0
 		return self.PD0+self.PDa*((alpha-self.alpha_0)**2)
 
 	'''
@@ -56,12 +60,18 @@ class Model(object):
 	#wy stands for angular velocity in y-direction
 
 	def coef_pitch(self, alpha, wy):
+		#print "\nIn coef_pitch"
+		#print "alpha,wy:",alpha,wy
+		#print "PTy0,PTywy,PTya:",self.PTy0,self.PTywy,self.PTya
 		return -self.PTy0+(self.PTywy*wy)+(self.PTya*alpha)
 
 	#Calculate total roll moment (x-body torque coefficient)
 	#wz is z-direction angular velocity, wx is x-direction angular velocity
 
 	def coef_roll(self, wx, wz):
+		#print "\nIn coef_roll"
+		#print "wx,wz:",wx,wz
+		#print "PTxwx,PTxwz:",self.PTxwx,self.PTxwz
 		return -(self.PTxwz*wz)  - (self.PTxwx*wx)
 
 	#Calculate total spin down moment (z-body torque coefficient)
