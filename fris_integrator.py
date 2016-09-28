@@ -13,7 +13,7 @@ import sys
 #Initialize frisbee object with appropriate coefficient values and initial conditions.
 #Current parameter input values obtained from Hummel 2003 (pg. 82)
 #Change to debug=False to supress printing
-test_fris=frisbee_object.Frisbee(0.,0.,1.,20.,0.,0.,0.,-.087,0.,0.,0.,50.,debug=False)
+test_fris=frisbee_object.Frisbee(0.,0.,1.,20.,0.,0.,0.,-.087,0.,0.,0.,-50.,debug=True)
 test_fris.initialize_model(0.331,1.9124,0.1769,0.685,  0.4338,0.0144,0.0821,  0.0125,0.00171,0.0000341)
 #print(test_fris.get_force())
 #print(test_fris.get_torque())
@@ -27,6 +27,7 @@ print("Initial derivatives: ",test_fris.derivatives_array())
 def equations_of_motion(positions, t):
 
     #Current positions
+    """
     (test_fris.x,test_fris.y,test_fris.z,
         #Current velocities
         test_fris.vx,test_fris.vy,test_fris.vz,
@@ -34,11 +35,16 @@ def equations_of_motion(positions, t):
         test_fris.phi,test_fris.theta,test_fris.gamma,
         #Current angular velocities
         test_fris.phidot,test_fris.thetadot,test_fris.gammadot)=positions[0:12]
-    if test_fris.z <= 0.0:
+        """
+    x,y,z,vx,vy,vz,phi,tht,gam,pd,td,gd = positions[0:12]
+    new_fris=frisbee_object.Frisbee(x,y,z,vx,vy,vz,phi,tht,gam,pd,td,gd)
+    new_fris.model=test_fris.model
+    if z <= 0.0:
         return np.zeros_like(positions)
 
     #Calculate all derivatives based on current positions. Return array of derivatives.
-    positionsdot=test_fris.derivatives_array()
+    #positionsdot=test_fris.derivatives_array()
+    positionsdot=new_fris.derivatives_array()
     #print "EOM:",t,positionsdot[9:12]
     #if t > 0.001:
     #    sys.exit()
@@ -59,10 +65,10 @@ def main():
 
     #Define initial and final times
     ti=0.0
-    tf=3.5
+    tf=1.0
 
     #Define number of steps and calculate step size
-    n=50 #number of steps
+    n=100 #number of steps
     dt=(tf-ti)/(n-1)
 
     #Create time array
@@ -70,6 +76,7 @@ def main():
 
     print equations_of_motion(positions,time[0])
     solution=odeint(equations_of_motion, positions, time)
+    print solution.shape
 
     np.savetxt("solution.txt",solution)
     solution = np.loadtxt("solution.txt")
@@ -82,6 +89,8 @@ def main():
         derivativenames=(['x-Position (m)','y-Position (m)','z-Position (m)','vx (x-velocity (m/s))','vy (y-velocity (m/s))','vz (z-velocity (m/s))',
             'Phi','Theta','Gamma','phidot (phi angular velocity (radians/s))','thetadot (theta angular velocity (radians/s))',
             'gammadot (gamma angular velocity (radians/s))'])
+        for j in range(0,len(time)):
+            print time[j],solution[j,i]
         fig=plt.figure()
         plt.plot(time, solution[:,i])
         plt.ylabel(derivativenames[i])
@@ -97,6 +106,7 @@ def main():
     plt.plot(solution[:,0], solution[:,1], solution[:,2])
     plt.show()
     raw_input('Press enter to close.')
+    plt.close(fig)
 
 if __name__ == '__main__':
     main()

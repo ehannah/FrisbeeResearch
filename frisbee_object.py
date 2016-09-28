@@ -7,8 +7,8 @@ rho=1.225 #kg/m^3, density of air
 area=0.057 #m^2, area of disc used in Hummel 2003
 m=.175 #kg, mass of disc used in Hummel 2003
 g=9.81 #m/s^2, gravitational acceleration
-Izz=0.00235 #kg-m^2
-Ixx=Iyy=Ixy=0.00122 #kg-m^2
+Izz=0.002352 #kg-m^2
+Ixx=Iyy=Ixy=0.001219 #kg-m^2
 d=2*(area/math.pi)**0.5 ##m; diameter of disc
 print "DIAMETER:",d
 #---------------------------------------------------------------------------------------------------#
@@ -176,7 +176,7 @@ class Frisbee(object):
     alpha=self.attackangle()
     v2=self.velocity_dot()
 
-    #Get x,y,z components of angular velocityfrom unit_ang_velocity function
+    #Get x,y,z components of angular velocity from unit_ang_velocity function
     av_unit = self.unit_ang_velocity()
     wxb=av_unit[0]
     wyb=av_unit[1]
@@ -191,19 +191,20 @@ class Frisbee(object):
 
     #Total torque - (SEE IMPORTANT NOTE IN TOM'S CODE!)
     rotation_matrix = self.rotationmatrix()
-    #NOTE FROM TOM - the dot products might have to be reversed compared to what you had before.
-    #We are looking for the angular accelartions of the angles, but need to work in the frisbee frame.
-    #Thus we reverse the dot product, since the moments are already in the lab frame (except the spin_moment)
-    #and thus by reversing the order we go back to the frisbee frame.
-    #total_torque=np.dot(rotation_matrix,roll_moment)+np.dot(rotation_matrix,pitch_moment)+spin_moment
-    total_torque=np.dot(roll_moment,rotation_matrix)+np.dot(pitch_moment,rotation_matrix)+spin_moment
+    total_torque=np.dot(rotation_matrix,roll_moment)+np.dot(rotation_matrix,pitch_moment)+spin_moment
+    #total_torque=np.dot(roll_moment,rotation_matrix)+np.dot(pitch_moment,rotation_matrix)+spin_moment
 
     if self.debug:
       print "\nIn get_torque"
+      print "Aero Amp:",0.5*rho*d*area*v2
+      print "Roll amp:",self.model.coef_roll(wxb,wzb)*0.5*rho*d*area*v2
+      print "Pitch amp:", self.model.coef_pitch(alpha,wyb)*0.5*rho*d*area*v2
+      print "Spin amp:",self.model.coef_spin(wzb)*0.5*rho*d*area*v2
       print "PitchMoment:",pitch_moment
       print "Pitch moment amplitude:",self.model.coef_pitch(alpha,wyb)
       print "w_b:",wxb, wyb, wzb
-      print "Moments:",roll_moment,pitch_moment,spin_moment
+      print "Raw moments:",roll_moment,pitch_moment,spin_moment
+      print "Moments:",np.dot(roll_moment,rotation_matrix),np.dot(pitch_moment,rotation_matrix),spin_moment
       print "total_torque:",total_torque
     return total_torque
 #---------------------------------------------------------------------------------------------------#
@@ -219,7 +220,7 @@ class Frisbee(object):
     gammadot=self.gammadot
 
     phi_dd=total_torque[0] + 2*Ixy*thetadot*phidot*st - Izz*thetadot*(phidot*st+gammadot)
-    phi_dd /= ct*Ixy
+    phi_dd /= (ct*Ixy)
 
     theta_dd=total_torque[1] + Izz*phidot*ct*(phidot*st+gammadot) - Ixy*phidot**2*ct*st
     theta_dd /= Ixy
@@ -229,13 +230,11 @@ class Frisbee(object):
 
     if self.debug:
       print "\nIn ang_acceleration:"
-      print self.theta, st,ct #This part is fine
-      print phidot, thetadot, gammadot #This is fine
+      print "angle_dot:",phidot, thetadot, gammadot #This is fine
       print "I:",Ixy,Izz #This is fine
-      #print total_torque[0], total_torque[0]/(ct*Ixy) #This might be the issue
-      print "theta_dd",theta_dd
-      print "total_torque[1]",total_torque[1],Izz*phidot*ct*(phidot*st+gammadot), Ixy*phidot**2*ct*st
-
+      print "phi_dd parts:",total_torque[0],2*Ixy*thetadot*phidot*st,Izz*thetadot*(phidot*st+gammadot)
+      print "theta_dd parts:",total_torque[1],Izz*phidot*ct*(phidot*st+gammadot),Ixy*phidot**2*ct*st
+      print "gamma_dd parts:",total_torque[2],Izz*(phidot*thetadot*ct + phi_dd*st)
     return np.array([phi_dd, theta_dd, gamma_dd])
 #---------------------------------------------------------------------------------------------------#
 
@@ -250,9 +249,8 @@ class Frisbee(object):
     ang_acc = self.ang_acceleration()
     if self.debug:
       print "\nIn derivatives_array:"
-      print "mass:",m
-      print "forces: ",forces
-      print "torques:",ang_acc
+      #print "forces: ",forces
+      print "ang_accs:",ang_acc
     return [self.vx, self.vy, self.vz,
       forces[0]/m, forces[1]/m, forces[2]/m,
       self.phidot, self.thetadot, self.gammadot,
