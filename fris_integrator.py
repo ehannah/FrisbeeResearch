@@ -34,6 +34,8 @@ def equations_of_motion(positions, t):
         test_fris.phi,test_fris.theta,test_fris.gamma,
         #Current angular velocities
         test_fris.phidot,test_fris.thetadot,test_fris.gammadot)=positions[0:12]
+    if test_fris.z <= 0.0:
+        return np.zeros_like(positions)
 
     #Calculate all derivatives based on current positions. Return array of derivatives.
     positionsdot=test_fris.derivatives_array()
@@ -69,8 +71,6 @@ def main():
     print equations_of_motion(positions,time[0])
     solution=odeint(equations_of_motion, positions, time)
 
-    print time[:10]
-    print(solution.shape)
     np.savetxt("solution.txt",solution)
     solution = np.loadtxt("solution.txt")
 #---------------------------------------------------------------------------------------------------#
@@ -78,7 +78,7 @@ def main():
     #Graph solutions to analyze relevance and assess code.
     
     
-    for i in xrange(0,1):
+    for i in xrange(0,12):
         derivativenames=(['x-Position (m)','y-Position (m)','z-Position (m)','vx (x-velocity (m/s))','vy (y-velocity (m/s))','vz (z-velocity (m/s))',
             'Phi','Theta','Gamma','phidot (phi angular velocity (radians/s))','thetadot (theta angular velocity (radians/s))',
             'gammadot (gamma angular velocity (radians/s))'])
