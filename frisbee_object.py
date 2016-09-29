@@ -5,8 +5,9 @@ import model_object
 
 rho=1.225 #kg/m^3, density of air
 area=0.057 #m^2, area of disc used in Hummel 2003
-m=.175 #kg, mass of disc used in Hummel 2003
+m=0.175 #kg, mass of disc used in Hummel 2003
 g=9.81 #m/s^2, gravitational acceleration
+F_gravity = m*g*np.array([0.,0.,-1.]) #gravitational force
 Izz=0.002352 #kg-m^2
 Ixx=Iyy=Ixy=0.001219 #kg-m^2
 d=2*(area/math.pi)**0.5 ##m; diameter of disc
@@ -31,7 +32,7 @@ class Frisbee(object):
     self.gammadot=gammadot
     self.update_data_fields() #Calculate all vectors and matrices
     
-  #Represent Frisbee object by printing instantaneous position and velocity.
+  #Represent Frisbee object by printing instantaneous positions and velocities.
   def __str__(self):
     outstr = "Position: (%f,%f,%f)\n"%(self.x,self.y,self.z)+          "Velocity: (%f,%f,%f)\n"%(self.vx,self.vy,self.vz)
     outstr+= "Angles:   (%f,%f,%f)\n"%(self.phi,self.theta,self.gamma)+"AngVelos: (%f,%f,%f)\n"%(self.phidot,self.thetadot,self.gammadot)
@@ -50,10 +51,11 @@ class Frisbee(object):
 #---------------------------------------------------------------------------------------------------#
 
   #Update the data fields in the frisbee that need to be used in the calculation,
-  #namely the rotation matrix, the bhat vectors, the angle of attack, and the velocity.
+  #namely the rotation matrix, the bhat vectors, the angle of attack, the velocity, etc.
   def update_data_fields(self):
     self.calculate_trig_functions()
     self.velocity = np.array([self.vx,self.vy,self.vz])
+    self.angle_dots = np.array([self.phidot,self.thetadot,self.gammadot])
     self.vhat = self.velocity/np.linalg.norm(self.velocity)
     self.v2 = np.dot(self.velocity,self.velocity)
     self.rotation_matrix = self.calc_rotation_matrix()
@@ -102,6 +104,7 @@ class Frisbee(object):
     return [xbhat,ybhat,zbhat]
 
 #---------------------------------------------------------------------------------------------------#
+
   #Calculate angle of attack, defined as angle between plane of disc and velocity vector
   #of the frisbee's motion. First step is to calculate scalar component of the velocity 
   #that is not in the plane of the disc (dot product of z-body unit vector and velocity
@@ -113,8 +116,8 @@ class Frisbee(object):
     v = self.velocity
     zbhat = self.zbhat
     zcomponent = np.dot(v,zbhat)
-    v_plane = v-(zbhat*zcomponent)
-    return -math.atan(zcomponent/(np.linalg.norm(v_plane)))
+    v_plane = v - zbhat*zcomponent
+    return -math.atan(zcomponent/np.linalg.norm(v_plane))
 
 #---------------------------------------------------------------------------------------------------#
 
@@ -135,7 +138,7 @@ class Frisbee(object):
     wxb = np.dot(av_labframe,xbhat)
     wyb = np.dot(av_labframe,ybhat)
     wzb = np.dot(av_labframe,zbhat)
-    return [wxb, wyb, wzb]
+    return [wxb,wyb,wzb]
 
 #---------------------------------------------------------------------------------------------------#
 
@@ -145,19 +148,17 @@ class Frisbee(object):
     alpha, v2 = self.angle_of_attack, self.v2
     vhat,ybhat = self.vhat,self.ybhat
     force_amplitude = 0.5*rho*area*v2
-    F_lift=self.model.coef_lift(alpha)*force_amplitude*np.cross(vhat,ybhat)
-    F_drag=self.model.coef_drag(alpha)*force_amplitude*(-vhat)
-    F_gravity=m*g*np.array([0.,0.,-1.])
-    if self.debug:
-      print "\nIn get_forces"
-      print "CL:",self.model.coef_lift(alpha)
-      print "CD:",self.model.coef_drag(alpha)
-      print "Amplitude:",force_amplitude
-      print "alpha, v2:",alpha,v2
-      print "F_lift:",F_lift
-      print "F_drag:",F_drag
-      print "F_grav:",F_gravity
+    F_lift = self.model.coef_lift(alpha)*force_amplitude*np.cross(vhat,ybhat)
+    F_drag = self.model.coef_drag(alpha)*force_amplitude*(-vhat)
     total_force=F_lift+F_drag+F_gravity
+    if self.debug:
+      print "In get_forces"
+      print "\tCL:",self.model.coef_lift(alpha)
+      print "\tCD:",self.model.coef_drag(alpha)
+      print "\tAmplitude:",force_amplitude
+      print "\tF_lift/m:",F_lift/m
+      print "\tF_drag/m:",F_drag/m
+      print "\tF_grav/m:",F_gravity/m
     return total_force
 
 #---------------------------------------------------------------------------------------------------#
@@ -182,46 +183,39 @@ class Frisbee(object):
 
     #Total torque - We rotate from the frisbee frame into the lab frame
     rotation_matrix = self.rotation_matrix
-    total_torque=np.dot(rotation_matrix,roll_moment)+np.dot(rotation_matrix,pitch_moment)+spin_moment
+    total_torque=np.dot(rotation_matrix,roll_moment+pitch_moment)+spin_moment
+
+    #Use this to shut off the torques if you want
+    #total_torque *= 0
 
     if self.debug:
-      print "\nIn get_torque"
-      print "Aero Amp:",torque_amplitude
-      print "Roll amp:",self.model.coef_roll(wxb,wzb)*torque_amplitude
-      print "Pitch amp:", self.model.coef_pitch(alpha,wyb)*torque_amplitude
-      print "Spin amp:",self.model.coef_spin(wzb)*torque_amplitude
-      print "PitchMoment:",pitch_moment
-      print "Pitch moment amplitude:",self.model.coef_pitch(alpha,wyb)
-      print "w_b:",wxb, wyb, wzb
-      print "Raw moments:",roll_moment,pitch_moment,spin_moment
-      print "Moments:",np.dot(rotation_matrix,roll_moment),np.dot(rotation_matrix,pitch_moment),spin_moment
-      print "total_torque:",total_torque
+      print "In get_torque"
+      print "\tRoll amp:",self.model.coef_roll(wxb,wzb)*torque_amplitude
+      print "\tPitch amp:", self.model.coef_pitch(alpha,wyb)*torque_amplitude
+      print "\tSpin amp:",self.model.coef_spin(wzb)*torque_amplitude
+      print "\tRaw moments:",roll_moment,pitch_moment,spin_moment
+      print "\tLab moments:",np.dot(rotation_matrix,roll_moment),np.dot(rotation_matrix,pitch_moment),spin_moment
+      print "\ttotal_torque:",total_torque
     return total_torque
 #---------------------------------------------------------------------------------------------------#
+
   #Calculate derivatives of phidot, thetadot, and gammadot, which correspond to angular acceleration
   #values for phi, theta, and gamma. Units are radians/sec^2. Equations can be found in Hummel 2003 (pg. 48)
 
   def ang_acceleration(self):
     total_torque = self.get_torque()
     st,ct = self.sin_theta,self.cos_theta
-    phidot, thetadot, gammadot = self.phidot, self.thetadot, self.gammadot
+    phidot,thetadot,gammadot = self.phidot, self.thetadot, self.gammadot
 
-    phi_dd=total_torque[0] + 2*Ixy*thetadot*phidot*st - Izz*thetadot*(phidot*st+gammadot)
-    phi_dd /= (ct*Ixy)
-
-    theta_dd=total_torque[1] + Izz*phidot*ct*(phidot*st+gammadot) - Ixy*phidot**2*ct*st
-    theta_dd /= Ixy
-
-    gamma_dd=total_torque[2] - Izz*(phidot*thetadot*ct + phi_dd*st)
-    gamma_dd /= Izz
+    phi_dd   = (total_torque[0] + 2*Ixy*thetadot*phidot*st - Izz*thetadot*(phidot*st + gammadot))/(ct*Ixy)
+    theta_dd = (total_torque[1] + Izz*phidot*ct*(phidot*st+gammadot) - Ixy*phidot*phidot*ct*st)/Ixy
+    gamma_dd = (total_torque[2] - Izz*(phidot*thetadot*ct + phi_dd*st))/Izz
 
     if self.debug:
-      print "\nIn ang_acceleration:"
-      print "I:",Ixy,Izz #This is fine
-      print "angle_dot:",phidot, thetadot, gammadot #This is fine
-      print "phi_dd parts:",total_torque[0],2*Ixy*thetadot*phidot*st,Izz*thetadot*(phidot*st+gammadot)
-      print "theta_dd parts:",total_torque[1],Izz*phidot*ct*(phidot*st+gammadot),Ixy*phidot**2*ct*st
-      print "gamma_dd parts:",total_torque[2],Izz*(phidot*thetadot*ct + phi_dd*st)
+      print "In ang_acceleration:"
+      print "\tphi_dd parts:",total_torque[0],2*Ixy*thetadot*phidot*st,Izz*thetadot*(phidot*st+gammadot)
+      print "\ttheta_dd parts:",total_torque[1],Izz*phidot*ct*(phidot*st+gammadot),Ixy*phidot**2*ct*st
+      print "\tgamma_dd parts:",total_torque[2],-Izz*(phidot*thetadot*ct + phi_dd*st)
     return np.array([phi_dd, theta_dd, gamma_dd])
 #---------------------------------------------------------------------------------------------------#
 
@@ -232,17 +226,19 @@ class Frisbee(object):
     #phi ang. acceleration, theta ang. acceleration, gamma ang. acceleration]
 
   def derivatives_array(self):
-    self.update_data_fields()
-    forces = self.get_force()
-    ang_acc = self.ang_acceleration()
     if self.debug:
-      print "\nIn derivatives_array:"
-      print "forces: ",forces
-      print "ang_accs:",ang_acc
+      print "" #print a blank line
+    self.update_data_fields()
     derivatives = np.zeros(12)
-    derivatives[0:3] = self.vx,self.vy,self.vz
-    derivatives[3:6] = forces/m
-    derivatives[6:9] = self.phidot,self.thetadot,self.gammadot
-    derivatives[9:12]= ang_acc
+    derivatives[0:3] = self.velocity
+    derivatives[3:6] = self.get_force()/m
+    derivatives[6:9] = self.angle_dots
+    derivatives[9:12]= self.ang_acceleration()
+    if self.debug:
+      print "In derivatives_array:"
+      print "\tvelocities: ",derivatives[0:3]
+      print "\tforces/m: ",derivatives[3:6]
+      print "\tangle dots: ",derivatives[6:9]
+      print "\tang_accs: ",derivatives[9:12]
     return derivatives
 
