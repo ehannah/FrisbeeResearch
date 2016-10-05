@@ -99,7 +99,7 @@ def main():
 
     #Graph solutions to analyze relevance and assess code.
     
-    
+    '''
     for i in xrange(0,12):
         derivativenames=(['x-Position (m)','y-Position (m)','z-Position (m)','vx (x-velocity (m/s))','vy (y-velocity (m/s))','vz (z-velocity (m/s))',
             'Phi','Theta','Gamma','phidot (phi angular velocity (radians/s))','thetadot (theta angular velocity (radians/s))',
@@ -112,6 +112,7 @@ def main():
         plt.pause(1)
         raw_input('Press enter to close.')
         plt.close(fig)
+    '''
     
     #sys.exit()
     fig=plt.figure()
