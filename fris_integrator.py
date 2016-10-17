@@ -67,6 +67,7 @@ def main():
 
     #Create time array
     time=np.arange(ti,tf,dt)
+    np.savetxt("solutiontime.txt",time)
     #time=np.linspace(ti,tf, n)
 
     """
