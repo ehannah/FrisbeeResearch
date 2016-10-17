@@ -11,9 +11,9 @@ for line in solution:
 
 for i in range(len(xyz)):
 	xyz[i].insert(0,time[i])
-	xyz[i].append(str(0.25))
-	xyz[i].append(str(0.25))
-	xyz[i].append(str(0.25))
+	xyz[i].append(str(0.00635))
+	xyz[i].append(str(0.00635))
+	xyz[i].append(str(0.00635))
 time_position_uncertainty=xyz
 
 count=0
