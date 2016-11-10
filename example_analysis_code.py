@@ -3,7 +3,7 @@ This is a template for what the analysis code should look like.
 """
 import numpy as np
 from scipy import InterpolatedUnivariateSpline as IUS
-
+import fris_wrapper as wrapper
 """
 Step 1, read in the flight data.
 The data file should have the following format:
@@ -18,14 +18,11 @@ Step 2
 Define our prior
 """
 def lnprior(parameters):
-    CL0, CLa, CD0, CDa, etc = parameters
+    PL0, Pla, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = parameters 
     """
     Account for unphysical models
     and consider them impossible.
-    THIS IS AN EXAMPLE, GET RID OF THIS
     """
-    if CL0 < 0.0:
-        return -np.inf
 
     """
     This is an example of a flat prior
@@ -40,14 +37,15 @@ def lnprior(parameters):
     The rest of the parameters have flat priors (0.0)
     on them.
     """
-    return - 0.5 * (CL0 - 0.1)**2/0.02**2
+    #We are not using for now (perhaps later, we may try to guess validity of error bars)
+    #return - 0.5 * (CL0 - 0.1)**2/0.02**2
 
 """
 Step 3
 Define our likelihood
 """
 def lnlike(parameters,data):
-    CL0, CLa, CD0, CDa, etc = parameters
+    PL0, Pla, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = parameters
     t,x,y,z,x_err,y_err,z_err = data
     
     """
@@ -56,8 +54,10 @@ def lnlike(parameters,data):
     the initial and final times (which should be longer than the real throw),
     and the initial positions.
     """
-    model = get_model(parameters,t[0],t[-1]+1,x[0],y[0],z[0])
-    t_model,x_model,y_model,z_model = model #Disassemble the output of the model
+    model = wrapper.get_throw(parameters,t[0],t[-1]+1,x[0],y[0],z[0])
+    t_model = model[0]
+    model_positions = model[1]
+    x_model,y_model,z_model = model_positions[:,0], model_positions[:,1], model_positions[:,2] #Disassemble the output of the model
 
     """
     Make splines for our positions

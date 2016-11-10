@@ -12,7 +12,7 @@ from mpl_toolkits.mplot3d import Axes3D
 x=0.
 y=0.
 z=1.
-vx=15.
+vx=20.
 vy=0.
 vz=0.
 phi=0.
@@ -39,16 +39,17 @@ PTzwz=-0.0000341
 t0=0.0
 tf=3.0
 
-model=model_object.Model(PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz)
+initial_conditions=[x,y,z,vx,vy,vz,phi*np.pi/180.,theta*np.pi/180.,gamma*np.pi/180., phidot,thetadot,gammadot]
 
-initial_conditions=np.array([x,y,z,vx,vy,vz,phi,theta,gamma,phidot,thetadot,gammadot]) 
+model=[PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz]
 
-def get_trajectory(time, frisbee):
+def get_trajectory(frisbee,time):
 
-	positions=frisbee.x,frisbee.y,frisbee.z,frisbee.vx,frisbee.vy,frisbee.vz, frisbee.phi,frisbee.theta,frisbee.gamma, frisbee.phidot,frisbee.thetadot,frisbee.gammadot
-	trajectory=odeint(fris_integrator.equations_of_motion, initial_conditions, time)
+    positions=frisbee.x,frisbee.y,frisbee.z,frisbee.vx,frisbee.vy,frisbee.vz, frisbee.phi,frisbee.theta,frisbee.gamma, frisbee.phidot,frisbee.thetadot,frisbee.gammadot
+    trajectory=odeint(fris_integrator.equations_of_motion, initial_conditions, time)
     
-	return trajectory
+    return trajectory
+
 
 def make_plots(trajectory):
     fig=plt.figure()
@@ -63,25 +64,30 @@ def make_plots(trajectory):
     raw_input('Press enter to close.')
     plt.close(fig)
 
-def wrapper(initial_conditions, model, t0, tf):
 
-	#Make the frisbee object
-	frisbee=frisbee_object.Frisbee(x,y,z,vx,vy,vz,phi*np.pi/180.,theta*np.pi/180.,gamma*np.pi/180., phidot,thetadot,gammadot)
+def get_throw(initial_conditions,model,t0,tf):
+    ic=initial_conditions
+    mod=model
 
-	#Calculate time steps, given t0 and tf
-	n = 30
-	dt=(tf-t0)/(n-1)
-	time=np.arange(t0,tf,dt)
-	#print(get_trajectory(time, frisbee))
-	solution, time = get_trajectory(time, frisbee), time
+    #Make the frisbee object
+    frisbee=frisbee_object.Frisbee(ic[0],ic[1],ic[2],ic[3],ic[4],ic[5],ic[6],ic[7],ic[8],ic[9],ic[10],ic[11])
+    modelobject=model_object.Model(mod[0],mod[1],mod[2],mod[3],mod[4],mod[5],mod[6],mod[7],mod[8],mod[9])
+    frisbee.model=modelobject
 
-	print(solution)
-	#print(time)
-	#make_plots(solution)
-	#np.savetxt("solution.txt", solution[1])
-	#solution = np.loadtxt("solution.txt")
+    
+    #Calculate time steps
+    n = 1000
+    dt=(tf-t0)/(n-1)
+    time=np.arange(t0,tf,dt)
+    
+    solution=get_trajectory(frisbee,time)
+    #print(time)
+    #print(solution)
+    #make_plots(solution)
 
-	#return solution,time
+    return time, solution
 
-if __name__ == '__main__':
-	wrapper(initial_conditions, model, t0, tf)
+model=get_throw(initial_conditions,model,t0,tf)
+# print(model[0])
+print(model[1])
+    
