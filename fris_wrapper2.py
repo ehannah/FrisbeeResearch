@@ -85,7 +85,7 @@ def wrapper(initial_conditions,model,t0,tf):
     print(solution)
     make_plots(solution)
 
-    return time,solution
+    return time, solution
 
 print(wrapper(initial_conditions,model,t0,tf))
     
