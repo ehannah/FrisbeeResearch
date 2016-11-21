@@ -47,7 +47,9 @@ Define our likelihood
 def lnlike(parameters,data):
     PL0, Pla, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = parameters
     t,x,y,z,x_err,y_err,z_err = data
-    
+
+    print parameters
+
     """
     Get a simulated throw, our "model"
     This requires the model parameters,
@@ -56,13 +58,15 @@ def lnlike(parameters,data):
     """
     #Hard code in initial positions beyond x, y, z
     initial_conditions=[x[0], y[0], z[0], 20, 0, 0, 0*np.pi/180, -5*np.pi/180, 0*np.pi/180, 0, 0, -50]
+    #print(initial_conditions)
 
     #Put in correct order (i.e. that which is in get_throw)
     model = wrapper.get_throw(initial_conditions, parameters,t[0],t[-1]+1)
     t_model = model[0]
+    #print(t_model)
     model_positions = model[1]
     x_model,y_model,z_model = model_positions[:,0], model_positions[:,1], model_positions[:,2] #Disassemble the output of the model
-
+    #print x_model, y_model, z_model
     """
     Make splines for our positions
     """
@@ -77,6 +81,7 @@ def lnlike(parameters,data):
     ychi2 = -0.5*(y-y_spline(t))**2/(y_err**2)
     zchi2 = -0.5*(z-z_spline(t))**2/(z_err**2)
 
+    print xchi2#, ychi2, zchi2
     return xchi2 + ychi2 + zchi2
 
 """
@@ -94,7 +99,7 @@ test_parameters = [0.3331,1.9124,0.1769,0.685,0.4338,-0.0144,-0.0821,-0.0125,-0.
 #should get zeros for both lnprior and lnprob
 #Step two: try with small perterbations on parameters; should produce non-zero outputs.
 #print lnprior(test_parameters)
-print lnprob(test_parameters, data)
+lnprob(test_parameters, data)
 
 import sys
 sys.exit()

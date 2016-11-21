@@ -8,6 +8,7 @@ import fris_integrator
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+'''
 #Define initial conditions
 x=0.
 y=0.
@@ -42,8 +43,9 @@ tf=3.0
 initial_conditions=[x,y,z,vx,vy,vz,phi*np.pi/180.,theta*np.pi/180.,gamma*np.pi/180., phidot,thetadot,gammadot]
 
 model=[PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz]
+'''
 
-def get_trajectory(frisbee,time):
+def get_trajectory(frisbee,time, initial_conditions):
 
     positions=frisbee.x,frisbee.y,frisbee.z,frisbee.vx,frisbee.vy,frisbee.vz, frisbee.phi,frisbee.theta,frisbee.gamma, frisbee.phidot,frisbee.thetadot,frisbee.gammadot
     trajectory=odeint(fris_integrator.equations_of_motion, initial_conditions, time)
@@ -68,6 +70,7 @@ def make_plots(trajectory):
 def get_throw(initial_conditions,model,t0,tf):
     ic=initial_conditions
     mod=model
+    #print(ic)
 
     #Make the frisbee object
     frisbee=frisbee_object.Frisbee(ic[0],ic[1],ic[2],ic[3],ic[4],ic[5],ic[6],ic[7],ic[8],ic[9],ic[10],ic[11])
@@ -80,12 +83,11 @@ def get_throw(initial_conditions,model,t0,tf):
     dt=(tf-t0)/(n-1)
     time=np.arange(t0,tf,dt)
     
-    solution=get_trajectory(frisbee,time)
+    solution=get_trajectory(frisbee,time, ic)
     #print(time)
     #print(solution)
     #make_plots(solution)
 
     return time, solution
 
-model=get_throw(initial_conditions,model,t0,tf)
     
