@@ -2,16 +2,16 @@
 This is a template for what the analysis code should look like.
 """
 import numpy as np
-from scipy import InterpolatedUnivariateSpline as IUS
+from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 import fris_wrapper as wrapper
 """
 Step 1, read in the flight data.
 The data file should have the following format:
 t x y z x_err y_err z_err
 """
-input_name = "new_simulated_throw.txt"
+input_name = "new_simulated_solution.txt"
 data = np.genfromtxt(input_name).T #Need to flip it to get it to be 7xN
-print data.shape
+#print data.shape
 
 """
 Step 2
@@ -54,7 +54,11 @@ def lnlike(parameters,data):
     the initial and final times (which should be longer than the real throw),
     and the initial positions.
     """
-    model = wrapper.get_throw(parameters,t[0],t[-1]+1,x[0],y[0],z[0])
+    #Hard code in initial positions beyond x, y, z
+    initial_conditions=[x[0], y[0], z[0], 20, 0, 0, 0*np.pi/180, -5*np.pi/180, 0*np.pi/180, 0, 0, -50]
+
+    #Put in correct order (i.e. that which is in get_throw)
+    model = wrapper.get_throw(initial_conditions, parameters,t[0],t[-1]+1)
     t_model = model[0]
     model_positions = model[1]
     x_model,y_model,z_model = model_positions[:,0], model_positions[:,1], model_positions[:,2] #Disassemble the output of the model
@@ -80,10 +84,20 @@ Step 4
 Define the posterior probability that we are sampling.
 """
 def lnprob(parameters,data):
-    prior = lnprior(parameters):
+    prior = lnprior(parameters)
     if not np.isfinite(prior):
         return -np.inf
     return prior + lnlike(parameters,data)
+
+test_parameters = [0.3331,1.9124,0.1769,0.685,0.4338,-0.0144,-0.0821,-0.0125,-0.00171,-0.0000341]
+
+#should get zeros for both lnprior and lnprob
+#Step two: try with small perterbations on parameters; should produce non-zero outputs.
+#print lnprior(test_parameters)
+print lnprob(test_parameters, data)
+
+import sys
+sys.exit()
 
 """
 Step 5

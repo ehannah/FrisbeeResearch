@@ -88,6 +88,4 @@ def get_throw(initial_conditions,model,t0,tf):
     return time, solution
 
 model=get_throw(initial_conditions,model,t0,tf)
-# print(model[0])
-print(model[1])
     
