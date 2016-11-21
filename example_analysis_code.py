@@ -48,7 +48,7 @@ def lnlike(parameters,data):
     PL0, Pla, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = parameters
     t,x,y,z,x_err,y_err,z_err = data
 
-    print parameters
+    #print parameters
 
     """
     Get a simulated throw, our "model"
@@ -77,11 +77,11 @@ def lnlike(parameters,data):
     """
     Use a chi^2 on the positions
     """
-    xchi2 = -0.5*(x-x_spline(t))**2/(x_err**2)
-    ychi2 = -0.5*(y-y_spline(t))**2/(y_err**2)
-    zchi2 = -0.5*(z-z_spline(t))**2/(z_err**2)
+    xchi2 = -0.5*sum((x-x_spline(t))**2/(x_err**2))
+    ychi2 = -0.5*sum((y-y_spline(t))**2/(y_err**2))
+    zchi2 = -0.5*sum((z-z_spline(t))**2/(z_err**2))
 
-    print xchi2#, ychi2, zchi2
+    #print xchi2, tychi2, zchi2
     return xchi2 + ychi2 + zchi2
 
 """
@@ -100,9 +100,6 @@ test_parameters = [0.3331,1.9124,0.1769,0.685,0.4338,-0.0144,-0.0821,-0.0125,-0.
 #Step two: try with small perterbations on parameters; should produce non-zero outputs.
 #print lnprior(test_parameters)
 lnprob(test_parameters, data)
-
-import sys
-sys.exit()
 
 """
 Step 5
