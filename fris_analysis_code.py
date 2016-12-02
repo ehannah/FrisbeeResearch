@@ -29,8 +29,12 @@ def lnprior(parameters):
     """
     use_flat_priors = True
     if use_flat_priors:
-        if abs(PL0)>1 or abs(Pla)>1 or abs(PD0)>1 or abs(PDa)>1 or abs(PTya)>1 or abs(PTywy)>1 or abs(PTy0)>1 or abs(PTxwx)>1 or abs(PTxwz)>1 or abs(PTzwz)>1:
+        if any(np.fabs(parameters)>1):
+        #if abs(PL0)>1 or abs(Pla)>1 or abs(PD0)>1 or abs(PDa)>1 or abs(PTya)>1 or abs(PTywy)>1 or abs(PTy0)>1 or abs(PTxwx)>1 or abs(PTxwz)>1 or abs(PTzwz)>1:
+            return -np.inf
+        else:
             return 0.0
+
 
     """
     This is an example of a gaussian prior.
@@ -124,6 +128,7 @@ and if there are any extra arguments to it (data).
 sampler = emcee.EnsembleSampler(nwalkers,ndim,lnprob,args=(data,0.0))
 
 """
+(Note that written by Tom)
 Step 6
 Guess initial positions of the walkers.
 For now, use the parameter values that
@@ -147,7 +152,7 @@ Step 7
 Decide how many steps you will use and tell the sampler to do mcmc.
 """
 #Increase to larger numbers, until corner plots remain the same upon substantial increases.
-nsteps = 10 #Arbitrary
+nsteps =400 #Arbitrary
 sampler.run_mcmc(pos,nsteps)
 
 """
@@ -163,5 +168,5 @@ import matplotlib.pyplot as plt
 import corner
 #Create a corner plot
 fig = corner.corner(chain)#, labels=[],truths = true_params)
-fig.savefig("cornertest_nsteps=10.png")
+fig.savefig("cornertest_nsteps=400.png")
 #plt.show()
