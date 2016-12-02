@@ -29,7 +29,9 @@ def lnprior(parameters):
     """
     use_flat_priors = True
     if use_flat_priors:
-        return 0.0
+        if abs(PL0)>1 or abs(Pla)>1 or abs(PD0)>1 or abs(PDa)>1 or abs(PTya)>1 or abs(PTywy)>1 or abs(PTy0)>1 or abs(PTxwx)>1 or abs(PTxwz)>1 or abs(PTzwz)>1:
+            return 0.0
+
     """
     This is an example of a gaussian prior.
     Let's pretend that a previous measurement of
@@ -145,7 +147,7 @@ Step 7
 Decide how many steps you will use and tell the sampler to do mcmc.
 """
 #Increase to larger numbers, until corner plots remain the same upon substantial increases.
-nsteps = 150 #Arbitrary
+nsteps = 10 #Arbitrary
 sampler.run_mcmc(pos,nsteps)
 
 """
@@ -161,5 +163,5 @@ import matplotlib.pyplot as plt
 import corner
 #Create a corner plot
 fig = corner.corner(chain)#, labels=[],truths = true_params)
-fig.savefig("7th_corner_nsteps=400.png")
+fig.savefig("cornertest_nsteps=10.png")
 #plt.show()
