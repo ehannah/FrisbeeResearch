@@ -20,7 +20,7 @@ Define our prior
 """
 def lnprior(parameters):
     #Use only first four; fix all torque parameters
-    PL0, Pla, PD0, PDa = parameters
+    PL0, Pla, PD0, PDa = parameters[0:4]
     PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
     """
     Account for unphysical models
@@ -54,9 +54,10 @@ Step 3
 Define our likelihood
 """
 def lnlike(parameters,data):
-    PL0, Pla, PD0, PDa = parameters
+    PL0, Pla, PD0, PDa = parameters[0:4]
     PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
     t,x,y,z,x_err,y_err,z_err = data
+
 
     #print parameters
 
