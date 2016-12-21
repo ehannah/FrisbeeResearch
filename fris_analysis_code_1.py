@@ -56,7 +56,7 @@ Define our likelihood
 def lnlike(parameters,data):
     PL0, Pla, PD0, PDa = parameters[0:4]
     PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
-    new_parameters = [PL0, Pla, ...]
+    new_parameters = [PL0, Pla, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz]
     t,x,y,z,x_err,y_err,z_err = data
 
 
@@ -126,7 +126,7 @@ import emcee
 This is a 10 dimensional posterior,
 so we need at least double that number of walkers.
 """
-nwalkers, ndim = 20, 10
+nwalkers, ndim = 16, 4
 
 """
 Create a sampler object from emcee. It needs to know
@@ -147,7 +147,7 @@ Let's use a gaussian with 50% width
 on the means, where the means are
 the true parameters.
 """
-true_params = [0.3331,1.9124,0.1769,0.685,0.4338,-0.0144,-0.0821,-0.0125,-0.00171,-0.0000341]
+true_params = [0.3331,1.9124,0.1769,0.685]
 pos = np.zeros((nwalkers,ndim))
 for i in range(nwalkers):
     #The position is the true parameters plus a random component.
@@ -160,7 +160,7 @@ Step 7
 Decide how many steps you will use and tell the sampler to do mcmc.
 """
 #Increase to larger numbers, until corner plots remain the same upon substantial increases.
-nsteps =10 #Arbitrary
+nsteps =400 #Arbitrary
 sampler.run_mcmc(pos,nsteps)
 
 """
@@ -176,5 +176,5 @@ import matplotlib.pyplot as plt
 import corner
 #Create a corner plot
 fig = corner.corner(chain)#, labels=[],truths = true_params)
-fig.savefig("fixed_torque_cornertest_nsteps=10.png")
+fig.savefig("fixed_torque_cornertest_nsteps=400.png")
 #plt.show()
