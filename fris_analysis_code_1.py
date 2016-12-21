@@ -56,6 +56,7 @@ Define our likelihood
 def lnlike(parameters,data):
     PL0, Pla, PD0, PDa = parameters[0:4]
     PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
+    new_parameters = [PL0, Pla, ...]
     t,x,y,z,x_err,y_err,z_err = data
 
 
@@ -73,7 +74,7 @@ def lnlike(parameters,data):
 
     #Put in correct order (i.e. that which is in get_throw)
     #Here, instead of just writing parameters, use array that contains lift and drag parameters, and then hard code in torque parameters
-    model = wrapper.get_throw(initial_conditions, parameters,t[0],t[-1]+1)
+    model = wrapper.get_throw(initial_conditions, new_parameters,t[0],t[-1]+1)
     t_model = model[0]
     #print(t_model)
     model_positions = model[1]
