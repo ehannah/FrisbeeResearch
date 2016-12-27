@@ -1,3 +1,9 @@
+#Numpy files
+*.npy
+
+#Ignore figures
+*.png
+
 #Ignore compiled python code.
 *.pyc
 
