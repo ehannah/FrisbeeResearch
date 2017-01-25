@@ -31,7 +31,7 @@ test_fris.model=model
 #at time t, defined in main. All derivatives are explained and calculated in frisbee_object.py
 #module, and an array of derivatives is called below.
 
-def equations_of_motion(positions, t):
+def old_equations_of_motion(positions, t):
 
     #Update the positions of the frisbee
     (test_fris.x,test_fris.y,test_fris.z,
@@ -45,6 +45,25 @@ def equations_of_motion(positions, t):
 
     #Calculate all derivatives based on current positions. Return array of derivatives.
     positionsdot=test_fris.derivatives_array()
+    return positionsdot
+
+
+def equations_of_motion(positions, t, frisbee):
+
+    #Update the positions of the frisbee
+    (frisbee.x,frisbee.y,frisbee.z,
+     frisbee.vx,frisbee.vy,frisbee.vz,
+     frisbee.phi,frisbee.theta,frisbee.gamma,
+     frisbee.phidot,frisbee.thetadot,frisbee.gammadot)=positions
+
+    
+    #If it is on the ground, turn all derivatives to 0.
+    if frisbee.z <= 0.0:
+        return np.zeros_like(positions)
+
+    #Calculate all derivatives based on current positions. Return array of derivatives.
+    positionsdot=frisbee.derivatives_array()
+    #print positionsdot
     return positionsdot
 
 #---------------------------------------------------------------------------------------------------#

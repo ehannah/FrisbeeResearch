@@ -1,6 +1,10 @@
 """
 This is a template for what the analysis code should look like.
 """
+
+#Thoughts from Kevin: Set prior concentrated on true value and see if true value comes back
+#Initialize near true answer and see if we get true answer back
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 import fris_wrapper as wrapper
@@ -9,17 +13,21 @@ Step 1, read in the flight data.
 The data file should have the following format:
 t x y z x_err y_err z_err
 """
-input_name = "new_simulated_solution.txt"
+input_name = ("new_simulated_solution.txt")
 data = np.genfromtxt(input_name).T #Need to flip it to get it to be 7xN
 print data.shape
+#Define parameters that we are not interested in calculating (i.e. everything but lift and drag)
+other_params = np.array([0.3331, 1.9124, 0.685, 0.4338, -0.0144, -0.0821, -0.0125, -0.00171, -0.0000341])
 
 """
 Step 2
 Define our prior
 """
 def lnprior(parameters):
-    #Use only first four; fix all torque parameters
-    PL0, Pla, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = parameters 
+    #Extract parameter we are interested in studying
+    PD0 = parameters[2]
+    print(PD0)
+    PL0, Pla, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
     """
     Account for unphysical models
     and consider them impossible.
@@ -30,8 +38,7 @@ def lnprior(parameters):
     """
     use_flat_priors = True
     if use_flat_priors:
-        if any(np.fabs(parameters)>1):
-        #if abs(PL0)>1 or abs(Pla)>1 or abs(PD0)>1 or abs(PDa)>1 or abs(PTya)>1 or abs(PTywy)>1 or abs(PTy0)>1 or abs(PTxwx)>1 or abs(PTxwz)>1 or abs(PTzwz)>1:
+        if abs(PL0)>1:
             return -np.inf
         else:
             return 0.0
@@ -52,8 +59,11 @@ Step 3
 Define our likelihood
 """
 def lnlike(parameters,data):
-    PL0, Pla, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = parameters
+    PD0 = parameters[2]
+    PL0, Pla, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
+    new_parameters = np.array([PL0, Pla, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz])
     t,x,y,z,x_err,y_err,z_err = data
+
 
     #print parameters
 
@@ -69,7 +79,7 @@ def lnlike(parameters,data):
 
     #Put in correct order (i.e. that which is in get_throw)
     #Here, instead of just writing parameters, use array that contains lift and drag parameters, and then hard code in torque parameters
-    model = wrapper.get_throw(initial_conditions, parameters,t[0],t[-1]+1)
+    model = wrapper.get_throw(initial_conditions, new_parameters,t[0],t[-1]+1)
     t_model = model[0]
     #print(t_model)
     model_positions = model[1]
@@ -110,6 +120,8 @@ test_parameters = [0.3331,1.9124,0.1769,0.685,0.4338,-0.0144,-0.0821,-0.0125,-0.
 #lnprob(test_parameters, data)
 
 """
+(Note that written by Tom)
+
 Step 5
 Interface with emcee in order to do MCMC and
 sample the posterior.
@@ -119,7 +131,7 @@ import emcee
 This is a 10 dimensional posterior,
 so we need at least double that number of walkers.
 """
-nwalkers, ndim = 20, 10
+nwalkers, ndim = 2, 1
 
 """
 Create a sampler object from emcee. It needs to know
@@ -130,7 +142,6 @@ and if there are any extra arguments to it (data).
 sampler = emcee.EnsembleSampler(nwalkers,ndim,lnprob,args=(data,0.0))
 
 """
-(Note that written by Tom)
 Step 6
 Guess initial positions of the walkers.
 For now, use the parameter values that
@@ -141,7 +152,7 @@ Let's use a gaussian with 50% width
 on the means, where the means are
 the true parameters.
 """
-true_params = [0.3331,1.9124,0.1769,0.685,0.4338,-0.0144,-0.0821,-0.0125,-0.00171,-0.0000341]
+true_params = [0.1769]
 pos = np.zeros((nwalkers,ndim))
 for i in range(nwalkers):
     #The position is the true parameters plus a random component.
@@ -154,7 +165,7 @@ Step 7
 Decide how many steps you will use and tell the sampler to do mcmc.
 """
 #Increase to larger numbers, until corner plots remain the same upon substantial increases.
-nsteps =600 #Arbitrary
+nsteps = 50 #Arbitrary
 sampler.run_mcmc(pos,nsteps)
 
 """
@@ -166,9 +177,8 @@ np.save("chain",chain)
 means = np.mean(chain,1) #Find the means of the parameters
 stddev = np.std(chain,1) #Find the standard deviations
 
-import matplotlib.pyplot as plt
 import corner
 #Create a corner plot
 fig = corner.corner(chain)#, labels=[],truths = true_params)
-fig.savefig("cornertest_nsteps=600.png")
+fig.savefig("PD0_simulation_recovery_nsteps=2000.png")
 #plt.show()

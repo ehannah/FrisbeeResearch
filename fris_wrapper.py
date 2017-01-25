@@ -47,8 +47,7 @@ model=[PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz]
 
 def get_trajectory(frisbee,time, initial_conditions):
 
-    positions=frisbee.x,frisbee.y,frisbee.z,frisbee.vx,frisbee.vy,frisbee.vz, frisbee.phi,frisbee.theta,frisbee.gamma, frisbee.phidot,frisbee.thetadot,frisbee.gammadot
-    trajectory=odeint(fris_integrator.equations_of_motion, initial_conditions, time)
+    trajectory=odeint(fris_integrator.equations_of_motion, initial_conditions, time, args=(frisbee,), printmessg=False)
     
     return trajectory
 

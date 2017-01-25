@@ -1,6 +1,5 @@
 import numpy as np
 import math
-#import new_fris_coefficients as coef #This import isn't necessary
 import model_object
 
 rho=1.225 #kg/m^3, density of air
