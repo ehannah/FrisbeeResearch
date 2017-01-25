@@ -25,8 +25,9 @@ Define our prior
 """
 def lnprior(parameters):
     #Extract parameter we are interested in studying
+    #print(parameters)
     PD0 = parameters[2]
-    print(PD0)
+    #print(PD0)
     PL0, Pla, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
     """
     Account for unphysical models
