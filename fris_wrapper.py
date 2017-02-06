@@ -8,7 +8,7 @@ import fris_integrator
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-'''
+ 
 #Define initial conditions
 x=0.
 y=0.
@@ -43,8 +43,7 @@ tf=3.0
 initial_conditions=[x,y,z,vx,vy,vz,phi*np.pi/180.,theta*np.pi/180.,gamma*np.pi/180., phidot,thetadot,gammadot]
 
 model=[PL0, PLa, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz]
-'''
-
+ 
 def get_trajectory(frisbee,time, initial_conditions):
 
     trajectory=odeint(fris_integrator.equations_of_motion, initial_conditions, time, args=(frisbee,), printmessg=False)
@@ -63,6 +62,7 @@ def make_plots(trajectory):
     plt.draw()
     plt.pause(1)
     raw_input('Press enter to close.')
+    plt.show()
     plt.close(fig)
 
 

@@ -17,7 +17,7 @@ input_name = ("new_simulated_solution.txt")
 data = np.genfromtxt(input_name).T #Need to flip it to get it to be 7xN
 print data.shape
 #Define parameters that we are not interested in calculating (i.e. everything but lift and drag)
-other_params = np.array([0.3331, 1.9124, 0.685, 0.4338, -0.0144, -0.0821, -0.0125, -0.00171, -0.0000341])
+other_params = np.array([1.9124, 0.685, 0.4338, -0.0144, -0.0821, -0.0125, -0.00171, -0.0000341])
 
 """
 Step 2
@@ -26,9 +26,9 @@ Define our prior
 def lnprior(parameters):
     #Extract parameter we are interested in studying
     #print(parameters)
-    PD0 = parameters[2]
+    PL0, PD0 = parameters[0:2]
     #print(PD0)
-    PL0, Pla, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
+    Pla, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
     """
     Account for unphysical models
     and consider them impossible.
@@ -60,8 +60,8 @@ Step 3
 Define our likelihood
 """
 def lnlike(parameters,data):
-    PD0 = parameters[2]
-    PL0, Pla, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
+    PL0, PD0 = parameters[0:2]
+    Pla, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz = other_params
     new_parameters = np.array([PL0, Pla, PD0, PDa, PTya, PTywy, PTy0, PTxwx, PTxwz, PTzwz])
     t,x,y,z,x_err,y_err,z_err = data
 
@@ -132,7 +132,7 @@ import emcee
 This is a 10 dimensional posterior,
 so we need at least double that number of walkers.
 """
-nwalkers, ndim = 2, 1
+nwalkers, ndim = 4, 2
 
 """
 Create a sampler object from emcee. It needs to know
@@ -153,7 +153,7 @@ Let's use a gaussian with 50% width
 on the means, where the means are
 the true parameters.
 """
-true_params = [0.1769]
+true_params = [0.3331 ,0.1769]
 pos = np.zeros((nwalkers,ndim))
 for i in range(nwalkers):
     #The position is the true parameters plus a random component.
@@ -166,20 +166,20 @@ Step 7
 Decide how many steps you will use and tell the sampler to do mcmc.
 """
 #Increase to larger numbers, until corner plots remain the same upon substantial increases.
-nsteps = 50 #Arbitrary
+nsteps = 1000 #Arbitrary
 sampler.run_mcmc(pos,nsteps)
 
 """
 Step 8
 Pull out the chain and analyze it.
 """
-chain = sampler.chain.reshape((-1,ndim))
-np.save("chain",chain)
+chain = sampler.chain[:, 200:, :].reshape((-1,ndim))
+np.save("PL0,PD0chain",chain)
 means = np.mean(chain,1) #Find the means of the parameters
 stddev = np.std(chain,1) #Find the standard deviations
 
 import corner
 #Create a corner plot
 fig = corner.corner(chain)#, labels=[],truths = true_params)
-fig.savefig("PD0_simulation_recovery_nsteps=2000.png")
+fig.savefig("PL0,PD0_simulation_recovery_nsteps=1000.png")
 #plt.show()
