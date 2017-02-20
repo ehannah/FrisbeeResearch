@@ -1,4 +1,4 @@
-31#Import relevant modules.
+#Import relevant modules.
 
 import numpy as np
 from scipy.integrate import odeint #Integrates a system of ordinary differential equations given initial conditions.

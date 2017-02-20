@@ -1,4 +1,4 @@
-#This file creates a 'model object' which is initalized with 
+#This fun  file creates a 'model object' which is initalized with 
 #a Frisbee's parameter values. The file calculates the forces
 #and torques acting on the Frisbee.
 
@@ -8,7 +8,7 @@ import numpy as np
 import math
 alpha_0 = 4.0*math.pi/180. #radians (4 degrees), constant value reported in Hummel 2003
 
-#---------------------------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------------------------------#
 
 #Create 'model class'. Initialized with Frisbee parameters. 
 

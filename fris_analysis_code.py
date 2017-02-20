@@ -166,14 +166,14 @@ Step 7
 Decide how many steps you will use and tell the sampler to do mcmc.
 """
 #Increase to larger numbers, until corner plots remain the same upon substantial increases.
-nsteps = 1000 #Arbitrary
+nsteps = 50 #Arbitrary
 sampler.run_mcmc(pos,nsteps)
 
 """
 Step 8
 Pull out the chain and analyze it.
 """
-chain = sampler.chain[:, 200:, :].reshape((-1,ndim))
+chain = sampler.chain[:, 10:, :].reshape((-1,ndim))
 np.save("PL0,PD0chain",chain)
 means = np.mean(chain,1) #Find the means of the parameters
 stddev = np.std(chain,1) #Find the standard deviations
@@ -181,5 +181,5 @@ stddev = np.std(chain,1) #Find the standard deviations
 import corner
 #Create a corner plot
 fig = corner.corner(chain)#, labels=[],truths = true_params)
-fig.savefig("PL0,PD0_simulation_recovery_nsteps=1000.png")
+fig.savefig("PL0,PD0_simulation_recovery_nsteps=10(new).png")
 #plt.show()
